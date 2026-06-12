@@ -34,12 +34,14 @@ public class Result<T> {
         return new Result<>(200, "成功");
     }
 
-    public static Result<?> error(Integer code, String message) {
-        return new Result<>(code, message);
+    @SuppressWarnings("unchecked")
+    public static <T> Result<T> error(Integer code, String message) {
+        return (Result<T>) new Result<>(code, message);
     }
 
-    public static Result<?> error(String message) {
-        return new Result<>(500, message);
+    @SuppressWarnings("unchecked")
+    public static <T> Result<T> error(String message) {
+        return (Result<T>) new Result<>(500, message);
     }
 
     // Getters and Setters
