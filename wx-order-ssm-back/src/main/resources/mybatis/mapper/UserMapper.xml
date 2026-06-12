@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <!-- 示例：User表的MyBatis Mapper映射 -->
-<mapper namespace="com.wechat.ordering.dao.UserMapper">
+<mapper namespace="com.wechat.ordering.mapper.UserMapper">
 
     <!-- 结果映射：将数据库列名(连字符)映射到Java属性(驼峰式) -->
     <resultMap id="UserResultMap" type="User">

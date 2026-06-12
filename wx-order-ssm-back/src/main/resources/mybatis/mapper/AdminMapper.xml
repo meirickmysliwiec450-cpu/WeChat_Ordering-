@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.AdminMapper">
+
+    <resultMap id="AdminResultMap" type="Admin">
+        <id column="id" property="id" />
+        <result column="username" property="username" />
+        <result column="password" property="password" />
+        <result column="real-name" property="realName" />
+        <result column="phone" property="phone" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="AdminResultMap">
+        SELECT id, username, password, `real-name`, phone, `create-time`
+        FROM t_admin
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="AdminResultMap">
+        SELECT id, username, password, `real-name`, phone, `create-time`
+        FROM t_admin WHERE id = #{id}
+    </select>
+
+    <select id="selectByUsername" parameterType="string" resultMap="AdminResultMap">
+        SELECT id, username, password, `real-name`, phone, `create-time`
+        FROM t_admin WHERE username = #{username}
+    </select>
+
+    <insert id="insert" parameterType="Admin" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_admin (username, password, `real-name`, phone, `create-time`)
+        VALUES (#{username}, #{password}, #{realName}, #{phone}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="Admin">
+        UPDATE t_admin SET
+            username = #{username},
+            password = #{password},
+            `real-name` = #{realName},
+            phone = #{phone}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_admin WHERE id = #{id}
+    </delete>
+
+</mapper>

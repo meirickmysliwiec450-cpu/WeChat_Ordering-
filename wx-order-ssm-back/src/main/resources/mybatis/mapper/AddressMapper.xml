@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.AddressMapper">
+
+    <resultMap id="AddressResultMap" type="Address">
+        <id column="id" property="id" />
+        <result column="user-id" property="userId" />
+        <result column="receiver" property="receiver" />
+        <result column="phone" property="phone" />
+        <result column="address-detail" property="addressDetail" />
+        <result column="is-default" property="isDefault" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="AddressResultMap">
+        SELECT id, `user-id`, receiver, phone, `address-detail`, `is-default`, `create-time`
+        FROM t_address
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="AddressResultMap">
+        SELECT id, `user-id`, receiver, phone, `address-detail`, `is-default`, `create-time`
+        FROM t_address WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="AddressResultMap">
+        SELECT id, `user-id`, receiver, phone, `address-detail`, `is-default`, `create-time`
+        FROM t_address WHERE `user-id` = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="Address" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_address (`user-id`, receiver, phone, `address-detail`, `is-default`, `create-time`)
+        VALUES (#{userId}, #{receiver}, #{phone}, #{addressDetail}, #{isDefault}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="Address">
+        UPDATE t_address SET
+            receiver = #{receiver},
+            phone = #{phone},
+            `address-detail` = #{addressDetail},
+            `is-default` = #{isDefault}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_address WHERE id = #{id}
+    </delete>
+
+</mapper>

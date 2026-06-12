@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.OrderCommentMapper">
+
+    <resultMap id="OrderCommentResultMap" type="OrderComment">
+        <id column="id" property="id" />
+        <result column="order-id" property="orderId" />
+        <result column="user-id" property="userId" />
+        <result column="score" property="score" />
+        <result column="content" property="content" />
+        <result column="photo" property="photo" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="OrderCommentResultMap">
+        SELECT id, `order-id`, `user-id`, score, content, photo, `create-time`
+        FROM t_order_comment ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="OrderCommentResultMap">
+        SELECT id, `order-id`, `user-id`, score, content, photo, `create-time`
+        FROM t_order_comment WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderId" resultMap="OrderCommentResultMap">
+        SELECT id, `order-id`, `user-id`, score, content, photo, `create-time`
+        FROM t_order_comment WHERE `order-id` = #{orderId}
+    </select>
+
+    <insert id="insert" parameterType="OrderComment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order_comment (`order-id`, `user-id`, score, content, photo, `create-time`)
+        VALUES (#{orderId}, #{userId}, #{score}, #{content}, #{photo}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="OrderComment">
+        UPDATE t_order_comment SET score = #{score}, content = #{content}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_order_comment WHERE id = #{id}
+    </delete>
+
+</mapper>

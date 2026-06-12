@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.DishMapper">
+
+    <resultMap id="DishResultMap" type="Dish">
+        <id column="id" property="id" />
+        <result column="category-id" property="categoryId" />
+        <result column="dish-name" property="dishName" />
+        <result column="image" property="image" />
+        <result column="price" property="price" />
+        <result column="description" property="description" />
+        <result column="sales" property="sales" />
+        <result column="stock" property="stock" />
+        <result column="status" property="status" />
+        <result column="discount" property="discount" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="DishResultMap">
+        SELECT id, `category-id`, `dish-name`, image, price, description,
+               sales, stock, status, discount, `create-time`
+        FROM t_dish ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="DishResultMap">
+        SELECT id, `category-id`, `dish-name`, image, price, description,
+               sales, stock, status, discount, `create-time`
+        FROM t_dish WHERE id = #{id}
+    </select>
+
+    <select id="selectByCategoryId" resultMap="DishResultMap">
+        SELECT id, `category-id`, `dish-name`, image, price, description,
+               sales, stock, status, discount, `create-time`
+        FROM t_dish WHERE `category-id` = #{categoryId} ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="DishResultMap">
+        SELECT id, `category-id`, `dish-name`, image, price, description,
+               sales, stock, status, discount, `create-time`
+        FROM t_dish WHERE status = #{status} ORDER BY `create-time` DESC
+    </select>
+
+    <insert id="insert" parameterType="Dish" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_dish (`category-id`, `dish-name`, image, price, description,
+                            sales, stock, status, discount, `create-time`)
+        VALUES (#{categoryId}, #{dishName}, #{image}, #{price}, #{description},
+                #{sales}, #{stock}, #{status}, #{discount}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="Dish">
+        UPDATE t_dish SET
+            `category-id` = #{categoryId},
+            `dish-name` = #{dishName},
+            image = #{image},
+            price = #{price},
+            description = #{description},
+            stock = #{stock},
+            status = #{status},
+            discount = #{discount}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_dish WHERE id = #{id}
+    </delete>
+
+</mapper>

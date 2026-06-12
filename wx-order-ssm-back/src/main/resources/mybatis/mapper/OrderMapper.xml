@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.OrderMapper">
+
+    <resultMap id="OrderResultMap" type="Order">
+        <id column="id" property="id" />
+        <result column="order-no" property="orderNo" />
+        <result column="user-id" property="userId" />
+        <result column="total-amount" property="totalAmount" />
+        <result column="pay-amount" property="payAmount" />
+        <result column="pay-status" property="payStatus" />
+        <result column="order-status" property="orderStatus" />
+        <result column="remark" property="remark" />
+        <result column="address-id" property="addressId" />
+        <result column="receiver" property="receiver" />
+        <result column="receiver-phone" property="receiverPhone" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="OrderResultMap">
+        SELECT id, `order-no`, `user-id`, `total-amount`, `pay-amount`,
+               `pay-status`, `order-status`, remark, `address-id`,
+               receiver, `receiver-phone`, `create-time`
+        FROM t_order ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="OrderResultMap">
+        SELECT id, `order-no`, `user-id`, `total-amount`, `pay-amount`,
+               `pay-status`, `order-status`, remark, `address-id`,
+               receiver, `receiver-phone`, `create-time`
+        FROM t_order WHERE id = #{id}
+    </select>
+
+    <select id="selectByUserId" resultMap="OrderResultMap">
+        SELECT id, `order-no`, `user-id`, `total-amount`, `pay-amount`,
+               `pay-status`, `order-status`, remark, `address-id`,
+               receiver, `receiver-phone`, `create-time`
+        FROM t_order WHERE `user-id` = #{userId} ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectByStatus" resultMap="OrderResultMap">
+        SELECT id, `order-no`, `user-id`, `total-amount`, `pay-amount`,
+               `pay-status`, `order-status`, remark, `address-id`,
+               receiver, `receiver-phone`, `create-time`
+        FROM t_order WHERE `order-status` = #{orderStatus} ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectByOrderNo" parameterType="string" resultMap="OrderResultMap">
+        SELECT id, `order-no`, `user-id`, `total-amount`, `pay-amount`,
+               `pay-status`, `order-status`, remark, `address-id`,
+               receiver, `receiver-phone`, `create-time`
+        FROM t_order WHERE `order-no` = #{orderNo}
+    </select>
+
+    <insert id="insert" parameterType="Order" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order (`order-no`, `user-id`, `total-amount`, `pay-amount`,
+                             `pay-status`, `order-status`, remark, `address-id`,
+                             receiver, `receiver-phone`, `create-time`)
+        VALUES (#{orderNo}, #{userId}, #{totalAmount}, #{payAmount},
+                #{payStatus}, #{orderStatus}, #{remark}, #{addressId},
+                #{receiver}, #{receiverPhone}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="Order">
+        UPDATE t_order SET
+            `pay-amount` = #{payAmount},
+            `pay-status` = #{payStatus},
+            `order-status` = #{orderStatus},
+            remark = #{remark}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_order WHERE id = #{id}
+    </delete>
+
+</mapper>

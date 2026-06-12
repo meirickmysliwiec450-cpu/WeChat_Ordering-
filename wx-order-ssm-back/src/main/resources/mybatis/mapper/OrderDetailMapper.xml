@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.OrderDetailMapper">
+
+    <resultMap id="OrderDetailResultMap" type="OrderDetail">
+        <id column="id" property="id" />
+        <result column="order-id" property="orderId" />
+        <result column="dish-id" property="dishId" />
+        <result column="dish-name" property="dishName" />
+        <result column="price" property="price" />
+        <result column="quantity" property="quantity" />
+        <result column="amount" property="amount" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="OrderDetailResultMap">
+        SELECT id, `order-id`, `dish-id`, `dish-name`, price, quantity, amount, `create-time`
+        FROM t_order_detail
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="OrderDetailResultMap">
+        SELECT id, `order-id`, `dish-id`, `dish-name`, price, quantity, amount, `create-time`
+        FROM t_order_detail WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderId" resultMap="OrderDetailResultMap">
+        SELECT id, `order-id`, `dish-id`, `dish-name`, price, quantity, amount, `create-time`
+        FROM t_order_detail WHERE `order-id` = #{orderId}
+    </select>
+
+    <insert id="insert" parameterType="OrderDetail" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_order_detail (`order-id`, `dish-id`, `dish-name`, price, quantity, amount, `create-time`)
+        VALUES (#{orderId}, #{dishId}, #{dishName}, #{price}, #{quantity}, #{amount}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="OrderDetail">
+        UPDATE t_order_detail SET
+            `dish-name` = #{dishName}, price = #{price},
+            quantity = #{quantity}, amount = #{amount}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_order_detail WHERE id = #{id}
+    </delete>
+
+</mapper>

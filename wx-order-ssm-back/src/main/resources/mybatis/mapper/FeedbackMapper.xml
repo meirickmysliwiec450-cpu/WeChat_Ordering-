@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.FeedbackMapper">
+
+    <resultMap id="FeedbackResultMap" type="Feedback">
+        <id column="id" property="id" />
+        <result column="user-id" property="userId" />
+        <result column="content" property="content" />
+        <result column="reply-content" property="replyContent" />
+        <result column="status" property="status" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="FeedbackResultMap">
+        SELECT id, `user-id`, content, `reply-content`, status, `create-time`
+        FROM t_feedback ORDER BY `create-time` DESC
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="FeedbackResultMap">
+        SELECT id, `user-id`, content, `reply-content`, status, `create-time`
+        FROM t_feedback WHERE id = #{id}
+    </select>
+
+    <select id="selectByStatus" resultMap="FeedbackResultMap">
+        SELECT id, `user-id`, content, `reply-content`, status, `create-time`
+        FROM t_feedback WHERE status = #{status} ORDER BY `create-time` DESC
+    </select>
+
+    <insert id="insert" parameterType="Feedback" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_feedback (`user-id`, content, `reply-content`, status, `create-time`)
+        VALUES (#{userId}, #{content}, #{replyContent}, #{status}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="Feedback">
+        UPDATE t_feedback SET
+            `reply-content` = #{replyContent},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_feedback WHERE id = #{id}
+    </delete>
+
+</mapper>

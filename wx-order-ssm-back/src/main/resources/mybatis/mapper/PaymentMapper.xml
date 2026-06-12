@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.PaymentMapper">
+
+    <resultMap id="PaymentResultMap" type="Payment">
+        <id column="id" property="id" />
+        <result column="order-id" property="orderId" />
+        <result column="pay-no" property="payNo" />
+        <result column="pay-amount" property="payAmount" />
+        <result column="pay-method" property="payMethod" />
+        <result column="pay-time" property="payTime" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="PaymentResultMap">
+        SELECT id, `order-id`, `pay-no`, `pay-amount`, `pay-method`, `pay-time`, `create-time`
+        FROM t_payment
+    </select>
+
+    <select id="selectById" parameterType="long" resultMap="PaymentResultMap">
+        SELECT id, `order-id`, `pay-no`, `pay-amount`, `pay-method`, `pay-time`, `create-time`
+        FROM t_payment WHERE id = #{id}
+    </select>
+
+    <select id="selectByOrderId" resultMap="PaymentResultMap">
+        SELECT id, `order-id`, `pay-no`, `pay-amount`, `pay-method`, `pay-time`, `create-time`
+        FROM t_payment WHERE `order-id` = #{orderId}
+    </select>
+
+    <insert id="insert" parameterType="Payment" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_payment (`order-id`, `pay-no`, `pay-amount`, `pay-method`, `pay-time`, `create-time`)
+        VALUES (#{orderId}, #{payNo}, #{payAmount}, #{payMethod}, #{payTime}, #{createTime})
+    </insert>
+
+    <update id="update" parameterType="Payment">
+        UPDATE t_payment SET
+            `pay-amount` = #{payAmount}, `pay-method` = #{payMethod},
+            `pay-time` = #{payTime}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_payment WHERE id = #{id}
+    </delete>
+
+</mapper>
