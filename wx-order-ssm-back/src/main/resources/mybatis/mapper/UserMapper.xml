@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!-- 示例：User表的MyBatis Mapper映射 -->
+<mapper namespace="com.wechat.ordering.dao.UserMapper">
+
+    <!-- 结果映射：将数据库列名(连字符)映射到Java属性(驼峰式) -->
+    <resultMap id="UserResultMap" type="User">
+        <id column="id" property="id" />
+        <result column="open-id" property="openId" />
+        <result column="nick-name" property="nickName" />
+        <result column="avatar" property="avatar" />
+        <result column="gender" property="gender" />
+        <result column="phone" property="phone" />
+        <result column="status" property="status" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <!-- 查询所有用户 -->
+    <select id="selectAll" resultMap="UserResultMap">
+        SELECT id, `open-id`, `nick-name`, avatar, gender, phone, status, `create-time`
+        FROM t_user
+    </select>
+
+    <!-- 根据ID查询用户 -->
+    <select id="selectById" parameterType="long" resultMap="UserResultMap">
+        SELECT id, `open-id`, `nick-name`, avatar, gender, phone, status, `create-time`
+        FROM t_user
+        WHERE id = #{id}
+    </select>
+
+    <!-- 根据OpenID查询用户 -->
+    <select id="selectByOpenId" parameterType="string" resultMap="UserResultMap">
+        SELECT id, `open-id`, `nick-name`, avatar, gender, phone, status, `create-time`
+        FROM t_user
+        WHERE `open-id` = #{openId}
+    </select>
+
+    <!-- 新增用户 -->
+    <insert id="insert" parameterType="User" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_user (
+            `open-id`, `nick-name`, avatar, gender, phone, status, `create-time`
+        ) VALUES (
+            #{openId}, #{nickName}, #{avatar}, #{gender}, #{phone}, #{status}, #{createTime}
+        )
+    </insert>
+
+    <!-- 更新用户 -->
+    <update id="update" parameterType="User">
+        UPDATE t_user
+        SET
+            `nick-name` = #{nickName},
+            avatar = #{avatar},
+            gender = #{gender},
+            phone = #{phone},
+            status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 删除用户 -->
+    <delete id="deleteById" parameterType="long">
+        DELETE FROM t_user WHERE id = #{id}
+    </delete>
+
+</mapper>
