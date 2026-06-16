@@ -10,6 +10,8 @@ public interface DishMapper {
     List<Dish> selectByCategoryId(@Param("categoryId") Long categoryId);
     List<Dish> selectByStatus(@Param("status") Integer status);
     int insert(Dish dish);
+    /** 插入菜品（手动指定ID，避免自增跳号） */
+    int insertWithId(Dish dish);
     int update(Dish dish);
     int deleteById(Long id);
 }

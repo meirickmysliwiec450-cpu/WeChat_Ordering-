@@ -48,6 +48,13 @@
                 #{sales}, #{stock}, #{status}, #{discount}, #{createTime})
     </insert>
 
+    <insert id="insertWithId" parameterType="Dish">
+        INSERT INTO t_dish (id, `category-id`, `dish-name`, image, price, description,
+                            sales, stock, status, discount, `create-time`)
+        VALUES (#{id}, #{categoryId}, #{dishName}, #{image}, #{price}, #{description},
+                #{sales}, #{stock}, #{status}, #{discount}, #{createTime})
+    </insert>
+
     <update id="update" parameterType="Dish">
         UPDATE t_dish SET
             `category-id` = #{categoryId},

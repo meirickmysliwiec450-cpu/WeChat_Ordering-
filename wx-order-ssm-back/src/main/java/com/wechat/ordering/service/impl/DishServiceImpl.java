@@ -4,6 +4,7 @@ import com.wechat.ordering.entity.Dish;
 import com.wechat.ordering.mapper.DishMapper;
 import com.wechat.ordering.service.DishService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -18,6 +19,9 @@ public class DishServiceImpl implements DishService {
     @Autowired
     private DishMapper dishMapper;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Override
     public Map<String, Object> list(Integer page, Integer pageSize, Long categoryId, String keyword) {
         List<Dish> all;
@@ -28,7 +32,6 @@ public class DishServiceImpl implements DishService {
             all = dishMapper.selectAll();
         }
 
-        // 关键词筛选
         if (keyword != null && !keyword.trim().isEmpty()) {
             String kw = keyword.trim().toLowerCase();
             all = all.stream()
@@ -59,7 +62,11 @@ public class DishServiceImpl implements DishService {
         dish.setCreateTime(LocalDateTime.now());
         if (dish.getSales() == null) dish.setSales(0);
         if (dish.getStatus() == null) dish.setStatus(1);
-        dishMapper.insert(dish);
+        // 手动指定ID = 当前最大ID + 1，彻底绕过AUTO_INCREMENT跳号问题
+        Long maxId = jdbcTemplate.queryForObject(
+            "SELECT COALESCE(MAX(id), 0) FROM t_dish", Long.class);
+        dish.setId((maxId != null ? maxId : 0) + 1);
+        dishMapper.insertWithId(dish);
     }
 
     @Override
