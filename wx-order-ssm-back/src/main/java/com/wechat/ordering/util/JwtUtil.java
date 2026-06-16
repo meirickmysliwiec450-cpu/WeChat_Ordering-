@@ -35,6 +35,44 @@ public class JwtUtil {
         }
     }
 
+    /** 生成用户Token（小程序端） */
+    public static String generateForUser(Long userId, String openId) {
+        return Jwts.builder()
+                .setSubject(String.valueOf(userId))
+                .claim("openId", openId)
+                .claim("role", "user")
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
+                .signWith(SignatureAlgorithm.HS256, SECRET)
+                .compact();
+    }
+
+    /** 从Token中获取用户ID */
+    public static Long getUserId(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return Long.parseLong(claims.getSubject());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /** 从Token中获取OpenID */
+    public static String getOpenId(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (String) claims.get("openId");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /** 验证Token是否有效 */
     public static boolean validate(String token) {
         try {

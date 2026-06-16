@@ -45,7 +45,7 @@ const categories = ref([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
-const form = ref({ categoryName: '', sort: 0 })
+const form = ref({ categoryName: '', sort: null })
 const editId = ref(null)
 
 async function fetchData() {
@@ -59,7 +59,9 @@ async function fetchData() {
 function handleAdd() {
   isEdit.value = false
   editId.value = null
-  form.value = { categoryName: '', sort: 0 }
+  // 计算默认排序号 = 最大排序号 + 1（新分类排在最后）
+  const maxSort = categories.value.reduce((max, c) => Math.max(max, c.sort || 0), 0)
+  form.value = { categoryName: '', sort: maxSort + 1 }
   dialogVisible.value = true
 }
 

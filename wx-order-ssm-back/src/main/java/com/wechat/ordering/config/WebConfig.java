@@ -15,6 +15,9 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private AuthInterceptor authInterceptor;
 
+    @Autowired
+    private WxAuthInterceptor wxAuthInterceptor;
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -27,8 +30,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 管理端认证拦截器
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/admin/**")
                 .excludePathPatterns("/admin/auth/login");
+        // 小程序端认证拦截器
+        registry.addInterceptor(wxAuthInterceptor)
+                .addPathPatterns("/wx/**")
+                .excludePathPatterns("/wx/user/login");
     }
 }
