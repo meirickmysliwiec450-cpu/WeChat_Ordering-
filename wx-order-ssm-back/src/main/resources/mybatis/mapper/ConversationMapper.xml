@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.wechat.ordering.mapper.ConversationMapper">
+
+    <resultMap id="ConvResultMap" type="Conversation">
+        <id column="id" property="id" />
+        <result column="user-id" property="userId" />
+        <result column="role" property="role" />
+        <result column="content" property="content" />
+        <result column="create-time" property="createTime" />
+    </resultMap>
+
+    <select id="selectByUserId" resultMap="ConvResultMap">
+        SELECT id, `user-id`, role, content, `create-time`
+        FROM t_conversation WHERE `user-id` = #{userId}
+        ORDER BY `create-time` ASC
+    </select>
+
+    <insert id="insert" parameterType="Conversation" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO t_conversation (`user-id`, role, content, `create-time`)
+        VALUES (#{userId}, #{role}, #{content}, #{createTime})
+    </insert>
+
+    <delete id="deleteByUserId">
+        DELETE FROM t_conversation WHERE `user-id` = #{userId}
+    </delete>
+
+</mapper>

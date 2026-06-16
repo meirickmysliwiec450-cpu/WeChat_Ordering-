@@ -29,4 +29,10 @@ public class Dish {
     private Integer status;
     private String discount;
     private LocalDateTime createTime;  // 数据库列：create-time
+
+    // 营养数据（每100g含量）
+    private Integer calories;    // 热量（千卡/100g）
+    private BigDecimal protein;  // 蛋白质（g/100g）
+    private BigDecimal fat;      // 脂肪（g/100g）
+    private BigDecimal carbs;    // 碳水化合物（g/100g）
 }

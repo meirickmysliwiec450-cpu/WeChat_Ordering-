@@ -61,8 +61,43 @@
         <el-form-item label="折扣">
           <el-input v-model="form.discount" placeholder="如: 8折" />
         </el-form-item>
+        <el-form-item label="营养信息">
+          <el-row :gutter="12">
+            <el-col :span="12"><el-input-number v-model="form.calories" :min="0" placeholder="热量(千卡/100g)" controls-position="right" style="width:100%" /></el-col>
+            <el-col :span="12"><el-input-number v-model="form.protein" :precision="1" :min="0" placeholder="蛋白质(g/100g)" controls-position="right" style="width:100%" /></el-col>
+          </el-row>
+          <el-row :gutter="12" style="margin-top:8px">
+            <el-col :span="12"><el-input-number v-model="form.fat" :precision="1" :min="0" placeholder="脂肪(g/100g)" controls-position="right" style="width:100%" /></el-col>
+            <el-col :span="12"><el-input-number v-model="form.carbs" :precision="1" :min="0" placeholder="碳水(g/100g)" controls-position="right" style="width:100%" /></el-col>
+          </el-row>
+        </el-form-item>
         <el-form-item label="图片URL">
-          <el-input v-model="form.image" placeholder="菜品图片地址" />
+          <el-input v-model="form.image" placeholder="选择下方图片或手动输入URL" />
+        </el-form-item>
+        <el-form-item label="预览" v-if="form.image">
+          <el-image :src="form.image" style="width:200px;height:120px;border-radius:6px" fit="cover" />
+        </el-form-item>
+        <el-form-item label="选择图片">
+          <div class="image-picker">
+            <div v-if="imageList.length === 0" style="color:#909399;font-size:13px;margin-bottom:8px">
+              暂无图片，请将图片放入 public/images 文件夹的子目录中
+            </div>
+            <template v-for="(group, folder) in imageGroups" :key="folder">
+              <div class="folder-label">{{ folder }}</div>
+              <div class="image-grid">
+                <div
+                  v-for="img in group"
+                  :key="img.name"
+                  class="image-item"
+                  :class="{ selected: form.image === img.url }"
+                  @click="form.image = img.url"
+                >
+                  <el-image :src="img.url" style="width:100%;height:80px" fit="cover" />
+                  <span class="image-name">{{ img.shortName }}</span>
+                </div>
+              </div>
+            </template>
+          </div>
         </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" />
@@ -77,10 +112,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { getDishes, addDish, updateDish, updateDishStatus, deleteDish } from '@/api/dish'
 import { getCategories } from '@/api/category'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import axios from 'axios'
 
 const dishes = ref([])
 const categories = ref([])
@@ -93,8 +129,32 @@ const pageSize = ref(10)
 const total = ref(0)
 const filterCategoryId = ref(null)
 const keyword = ref('')
+const imageList = ref([])
 
-const form = ref({ categoryId: null, dishName: '', price: 0, stock: 0, discount: '', image: '', description: '' })
+const emptyForm = () => ({ categoryId: null, dishName: '', price: 0, stock: 0, discount: '', image: '', description: '', calories: null, protein: null, fat: null, carbs: null })
+const form = ref(emptyForm())
+
+const imageGroups = computed(() => {
+  const groups = {}
+  for (const img of imageList.value) {
+    const slashIdx = img.name.lastIndexOf('/')
+    const folder = slashIdx > 0 ? img.name.substring(0, slashIdx) : '默认'
+    const shortName = slashIdx > 0 ? img.name.substring(slashIdx + 1) : img.name
+    if (!groups[folder]) groups[folder] = []
+    groups[folder].push({ ...img, shortName })
+  }
+  return groups
+})
+
+async function fetchImages() {
+  try {
+    const token = localStorage.getItem('adminToken')
+    const res = await axios.get('http://localhost:8080/api/admin/upload/images', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    imageList.value = res.data.data || []
+  } catch (e) { /* 忽略 */ }
+}
 
 async function fetchData() {
   loading.value = true
@@ -112,13 +172,15 @@ async function fetchCategories() {
 
 function handleAdd() {
   isEdit.value = false; editId.value = null
-  form.value = { categoryId: null, dishName: '', price: 0, stock: 0, discount: '', image: '', description: '' }
+  form.value = emptyForm()
+  fetchImages()
   dialogVisible.value = true
 }
 
 function handleEdit(row) {
   isEdit.value = true; editId.value = row.id
   form.value = { ...row }
+  fetchImages()
   dialogVisible.value = true
 }
 
@@ -150,4 +212,11 @@ onMounted(() => { fetchData(); fetchCategories() })
 
 <style scoped>
 .toolbar { display: flex; gap: 12px; margin-bottom: 16px; align-items: center; }
+.image-picker { width: 100%; }
+.folder-label { font-size: 13px; color: #409EFF; font-weight: bold; margin: 8px 0 4px; padding-bottom: 4px; border-bottom: 1px solid #e8e8e8; }
+.image-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.image-item { width: 110px; cursor: pointer; border: 2px solid transparent; border-radius: 6px; overflow: hidden; transition: border-color 0.2s; text-align: center; }
+.image-item:hover { border-color: #409EFF; }
+.image-item.selected { border-color: #409EFF; box-shadow: 0 0 0 2px rgba(64,158,255,0.3); }
+.image-name { display: block; font-size: 11px; color: #606266; padding: 2px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 </style>
