@@ -60,6 +60,18 @@ const router = createRouter({
           name: 'feedbacks',
           component: () => import('../views/feedback/FeedbackList.vue'),
           meta: { title: '反馈管理' }
+        },
+        {
+          path: 'comments',
+          name: 'comments',
+          component: () => import('../views/comment/CommentList.vue'),
+          meta: { title: '评价管理' }
+        },
+        {
+          path: 'payments',
+          name: 'payments',
+          component: () => import('../views/payment/PaymentList.vue'),
+          meta: { title: '支付记录' }
         }
       ]
     }

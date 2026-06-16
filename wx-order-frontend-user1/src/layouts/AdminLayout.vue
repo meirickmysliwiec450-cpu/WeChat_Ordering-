@@ -42,6 +42,14 @@
           <el-icon><ChatDotRound /></el-icon>
           <span>反馈管理</span>
         </el-menu-item>
+        <el-menu-item index="/comments">
+          <el-icon><Star /></el-icon>
+          <span>评价管理</span>
+        </el-menu-item>
+        <el-menu-item index="/payments">
+          <el-icon><Wallet /></el-icon>
+          <span>支付记录</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
