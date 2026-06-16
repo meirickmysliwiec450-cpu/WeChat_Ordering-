@@ -37,24 +37,67 @@
         </el-card>
       </el-col>
     </el-row>
+
+    <!-- AI推荐预览 -->
+    <el-card style="margin-top:20px">
+      <template #header>
+        <span>🤖 AI 推荐预览 — 当前时段：<b>{{ recommend.period }}</b></span>
+        <el-button size="small" style="float:right" @click="fetchRecommend" :loading="recLoading">刷新</el-button>
+      </template>
+      <el-row :gutter="16" v-if="recommend.dishes.length > 0">
+        <el-col :span="8" v-for="dish in recommend.dishes" :key="dish.id">
+          <el-card shadow="hover" class="recommend-card">
+            <el-image
+              v-if="dish.image"
+              :src="dish.image"
+              style="width:100%;height:140px;border-radius:6px"
+              fit="cover"
+            />
+            <div style="padding:8px 0">
+              <span style="font-size:15px;font-weight:bold">{{ dish.dishName }}</span>
+              <el-tag size="small" style="margin-left:8px">{{ dish.categoryName }}</el-tag>
+              <span style="float:right;color:#E6A23C;font-weight:bold">¥{{ dish.price }}</span>
+            </div>
+            <p style="color:#909399;font-size:12px;margin:0">💡 {{ dish.reason }}</p>
+          </el-card>
+        </el-col>
+      </el-row>
+      <p v-else style="color:#909399">暂无推荐数据，请先上架菜品并让用户下单</p>
+    </el-card>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getStats } from '@/api/dashboard'
+import axios from 'axios'
 
 const stats = ref({
   totalUsers: 0, totalOrders: 0, totalDishes: 0,
   totalRevenue: 0, todayOrders: 0, pendingFeedbacks: 0,
   pendingOrders: 0, acceptedOrders: 0, completedOrders: 0
 })
+const recommend = ref({ period: '', dishes: [] })
+const recLoading = ref(false)
+
+async function fetchRecommend() {
+  recLoading.value = true
+  try {
+    const token = localStorage.getItem('adminToken')
+    const res = await axios.get('http://localhost:8080/api/admin/recommend/preview', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    recommend.value = res.data.data
+  } catch (e) { /* 忽略 */ }
+  finally { recLoading.value = false }
+}
 
 onMounted(async () => {
   try {
     const res = await getStats()
     if (res.data) stats.value = res.data
   } catch (e) { /* 忽略 */ }
+  fetchRecommend()
 })
 </script>
 
@@ -64,4 +107,6 @@ onMounted(async () => {
 .stat-card p { color: #909399; margin: 0; font-size: 14px; }
 .stat-card h2 { margin: 4px 0 0; font-size: 24px; }
 .order-stats { display: flex; gap: 20px; }
+.recommend-card { border: 1px solid #e8e8e8; transition: transform 0.2s; }
+.recommend-card:hover { transform: translateY(-2px); }
 </style>

@@ -301,7 +301,39 @@ GET /wx/comments/order/{orderId}
 
 ---
 
-## 接口汇总（27个）
+## 十一、AI 个性化推荐 `/wx/recommend`  ⭐ 新功能
+
+> 需要 Token。
+
+### 今日为你推荐
+```
+GET /wx/recommend
+```
+**说明**：根据用户历史订单 + 当前时段（早/午/晚餐），AI 智能推荐 3 道菜品。
+
+**返回示例**：
+```json
+{
+  "code": 200,
+  "data": {
+    "period": "午餐",
+    "dishes": [
+      {
+        "id": 1, "dishName": "经典红烧肉", "image": "/images/热菜/经典红烧肉.png",
+        "price": 35.00, "sales": 120, "categoryName": "热菜",
+        "reason": "您之前多次点红烧肉，搭配一道清爽的汤品更佳"
+      },
+      { "id": 3, "dishName": "蒜泥白肉", "reason": "适合午餐食用的经典冷菜" },
+      { "id": 10, "dishName": "冰红茶", "reason": "夏季午餐的清爽饮品搭配" }
+    ]
+  }
+}
+```
+> 如果 AI 调用失败，自动切换为兜底推荐（基于销量和用户历史的简单推荐），返回中会有 `"fallback": true` 标记。
+
+---
+
+## 接口汇总（28个）
 
 | 模块 | 路径 | 接口数 | 需Token |
 |------|------|:---:|:---:|
@@ -315,7 +347,8 @@ GET /wx/comments/order/{orderId}
 | 支付 | `/wx/payments` | 1 | ✅ |
 | 反馈 | `/wx/feedbacks` | 2 | ✅ |
 | 评价 | `/wx/comments` | 2 | ✅ |
-| **合计** | | **27** | |
+| AI推荐 | `/wx/recommend` | 1 | ✅ |
+| **合计** | | **28** | |
 
 ---
 
