@@ -13,9 +13,15 @@ public class JwtUtil {
 
     /** 生成Token */
     public static String generate(Long adminId, String username) {
+        return generateWithRole(adminId, username, "admin");
+    }
+
+    /** 生成Token（含角色） */
+    public static String generateWithRole(Long adminId, String username, String role) {
         return Jwts.builder()
                 .setSubject(String.valueOf(adminId))
                 .claim("username", username)
+                .claim("role", role != null ? role : "admin")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
                 .signWith(SignatureAlgorithm.HS256, SECRET)
@@ -32,6 +38,19 @@ public class JwtUtil {
             return Long.parseLong(claims.getSubject());
         } catch (Exception e) {
             return null;
+        }
+    }
+
+    /** 从Token中获取角色 */
+    public static String getRole(String token) {
+        try {
+            Claims claims = Jwts.parser()
+                    .setSigningKey(SECRET)
+                    .parseClaimsJws(token)
+                    .getBody();
+            return (String) claims.get("role");
+        } catch (Exception e) {
+            return "admin";
         }
     }
 

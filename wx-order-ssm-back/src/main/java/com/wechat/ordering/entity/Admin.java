@@ -22,5 +22,7 @@ public class Admin {
     private String password;
     private String realName;     // 数据库列：real-name
     private String phone;
+    private String role;           // super_admin / admin
+    private Integer status;        // 1启用 0禁用
     private LocalDateTime createTime;  // 数据库列：create-time
 }

@@ -72,6 +72,12 @@ const router = createRouter({
           name: 'payments',
           component: () => import('../views/payment/PaymentList.vue'),
           meta: { title: '支付记录' }
+        },
+        {
+          path: 'admins/manage',
+          name: 'adminManage',
+          component: () => import('../views/admin/AdminList.vue'),
+          meta: { title: '管理员管理' }
         }
       ]
     }

@@ -33,5 +33,16 @@ public class DbInitConfig implements CommandLineRunner {
                 "id BIGINT AUTO_INCREMENT PRIMARY KEY, " +
                 "`user-id` BIGINT, role VARCHAR(20), content TEXT, `create-time` DATETIME)");
         } catch (Exception e) { /* 表已存在 */ }
+        // 超级管理员字段
+        try {
+            jdbcTemplate.execute("ALTER TABLE t_admin ADD COLUMN role VARCHAR(20) DEFAULT 'admin' AFTER phone");
+        } catch (Exception e) { /* 已存在 */ }
+        try {
+            jdbcTemplate.execute("ALTER TABLE t_admin ADD COLUMN status INT DEFAULT 1 AFTER role");
+        } catch (Exception e) { /* 已存在 */ }
+        // 确保默认admin是超级管理员
+        try {
+            jdbcTemplate.update("UPDATE t_admin SET role='super_admin', status=1 WHERE username='admin'");
+        } catch (Exception e) { /* 忽略 */ }
     }
 }

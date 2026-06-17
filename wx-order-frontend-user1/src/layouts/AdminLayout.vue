@@ -50,6 +50,10 @@
           <el-icon><Wallet /></el-icon>
           <span>支付记录</span>
         </el-menu-item>
+        <el-menu-item v-if="isSuperAdmin" index="/admins/manage">
+          <el-icon><Setting /></el-icon>
+          <span>管理员管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
@@ -97,6 +101,7 @@ const authStore = useAuthStore()
 const isCollapse = ref(false)
 const adminInfo = computed(() => authStore.adminInfo)
 const activeMenu = computed(() => route.path)
+const isSuperAdmin = computed(() => authStore.adminInfo?.role === 'super_admin')
 
 function handleCommand(command) {
   if (command === 'logout') {

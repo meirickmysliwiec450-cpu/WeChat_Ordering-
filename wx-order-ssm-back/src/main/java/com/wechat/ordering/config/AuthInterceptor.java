@@ -39,9 +39,11 @@ public class AuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        // 将adminId设置到请求属性中
+        // 将adminId和role设置到请求属性中
         Long adminId = JwtUtil.getAdminId(token);
+        String role = JwtUtil.getRole(token);
         request.setAttribute("adminId", adminId);
+        request.setAttribute("role", role);
         return true;
     }
 }

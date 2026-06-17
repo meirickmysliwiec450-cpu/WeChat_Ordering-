@@ -10,4 +10,10 @@ public interface AdminService {
     Admin getById(Long id);
     /** 更新管理员信息 */
     void update(Admin admin);
+    /** 获取所有管理员列表（仅超级管理员） */
+    java.util.List<Admin> listAll();
+    /** 超级管理员注册新管理员 */
+    void register(Admin admin);
+    /** 启用/禁用管理员 */
+    void toggleStatus(Long id, Integer status);
 }
