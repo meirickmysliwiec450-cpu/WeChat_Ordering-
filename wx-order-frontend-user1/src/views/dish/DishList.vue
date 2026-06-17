@@ -62,6 +62,12 @@
           <el-input v-model="form.discount" placeholder="如: 8折" />
         </el-form-item>
         <el-form-item label="营养信息">
+          <div style="margin-bottom:8px">
+            <el-button size="small" type="success" @click="autoFillNutrition" :loading="nutriLoading" :disabled="!form.dishName">
+              🤖 AI智能填充营养数据
+            </el-button>
+            <span style="color:#909399;font-size:12px;margin-left:8px">根据菜品名称自动查询营养信息</span>
+          </div>
           <el-row :gutter="12">
             <el-col :span="12"><el-input-number v-model="form.calories" :min="0" placeholder="热量(千卡/100g)" controls-position="right" style="width:100%" /></el-col>
             <el-col :span="12"><el-input-number v-model="form.protein" :precision="1" :min="0" placeholder="蛋白质(g/100g)" controls-position="right" style="width:100%" /></el-col>
@@ -168,6 +174,29 @@ async function fetchData() {
 async function fetchCategories() {
   const res = await getCategories()
   categories.value = res.data || []
+}
+
+const nutriLoading = ref(false)
+
+async function autoFillNutrition() {
+  if (!form.value.dishName) return
+  nutriLoading.value = true
+  try {
+    const token = localStorage.getItem('adminToken')
+    const res = await axios.post('http://localhost:8080/api/admin/dishes/nutrition-lookup',
+      { dishName: form.value.dishName },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    const d = res.data.data
+    form.value.calories = d.calories
+    form.value.protein = d.protein
+    form.value.fat = d.fat
+    form.value.carbs = d.carbs
+    ElMessage.success('营养数据已自动填充（来自AI查询）')
+  } catch (e) {
+    ElMessage.warning('AI查询失败，请手动填写')
+  }
+  finally { nutriLoading.value = false }
 }
 
 function handleAdd() {
