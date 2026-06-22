@@ -18,6 +18,8 @@ CREATE TABLE IF NOT EXISTS t_admin (
   password VARCHAR(100) NOT NULL COMMENT '登录密码',
   `real-name` VARCHAR(50) COMMENT '真实姓名',
   phone VARCHAR(20) COMMENT '联系电话',
+  role VARCHAR(20) DEFAULT 'admin' COMMENT '角色（super_admin超级管理员/admin普通管理员）',
+  status TINYINT DEFAULT 1 COMMENT '账号状态（1启用 0禁用）',
   `create-time` DATETIME COMMENT '创建时间',
   INDEX idx_username (username)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='管理员表';
@@ -63,6 +65,10 @@ CREATE TABLE IF NOT EXISTS t_dish (
   stock INT COMMENT '库存',
   status TINYINT COMMENT '上架状态',
   discount VARCHAR(100) COMMENT '折扣信息',
+  calories INT DEFAULT 0 COMMENT '热量(千卡/100g)',
+  protein DECIMAL(10,1) DEFAULT 0 COMMENT '蛋白质(g/100g)',
+  fat DECIMAL(10,1) DEFAULT 0 COMMENT '脂肪(g/100g)',
+  carbs DECIMAL(10,1) DEFAULT 0 COMMENT '碳水化合物(g/100g)',
   `create-time` DATETIME COMMENT '创建时间',
   FOREIGN KEY (`category-id`) REFERENCES t_category(id) ON DELETE CASCADE,
   INDEX idx_category_id (`category-id`),
@@ -210,12 +216,24 @@ CREATE TABLE IF NOT EXISTS t_banner (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='轮播图表';
 
 -- ============================================================
+-- 13. AI对话记录表：t_conversation
+-- ============================================================
+CREATE TABLE IF NOT EXISTS t_conversation (
+  id BIGINT PRIMARY KEY AUTO_INCREMENT COMMENT '对话ID',
+  `user-id` BIGINT COMMENT '用户ID',
+  role VARCHAR(20) COMMENT '角色（user用户消息/assistant AI回复）',
+  content TEXT COMMENT '对话内容',
+  `create-time` DATETIME COMMENT '创建时间',
+  INDEX idx_user_id (`user-id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='AI对话记录表';
+
+-- ============================================================
 -- 初始化数据
 -- ============================================================
 
 -- 插入默认管理员
-INSERT INTO t_admin (username, password, `real-name`, phone, `create-time`) 
-VALUES ('admin', '123456', '管理员', '18888888888', NOW());
+INSERT INTO t_admin (username, password, `real-name`, phone, role, status, `create-time`)
+VALUES ('admin', '123456', '管理员', '18888888888', 'super_admin', 1, NOW());
 
 -- 插入菜品分类
 INSERT INTO t_category (`category-name`, sort, `create-time`) VALUES

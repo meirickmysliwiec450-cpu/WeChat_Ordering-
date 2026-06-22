@@ -1,0 +1,15 @@
+{
+  "folders": [
+    {
+      "name": "前端-管理后台",
+      "path": "wx-order-frontend-user1"
+    },
+    {
+      "name": "后端-SSM",
+      "path": "wx-order-ssm-back"
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic"
+  }
+}

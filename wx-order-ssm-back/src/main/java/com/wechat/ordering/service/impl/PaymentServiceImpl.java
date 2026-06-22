@@ -6,9 +6,7 @@ import com.wechat.ordering.service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -21,7 +19,7 @@ public class PaymentServiceImpl implements PaymentService {
         List<Payment> all;
         if (orderId != null) {
             Payment payment = paymentMapper.selectByOrderId(orderId);
-            all = payment != null ? List.of(payment) : List.of();
+            all = payment != null ? Collections.singletonList(payment) : new ArrayList<>();
         } else {
             all = paymentMapper.selectAll();
         }
