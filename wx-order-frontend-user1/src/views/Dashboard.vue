@@ -23,8 +23,8 @@
         <el-card>
           <template #header>订单状态分布</template>
           <div class="order-stats">
-            <el-tag type="warning" size="large">待处理: {{ stats.pendingOrders }}</el-tag>
-            <el-tag type="primary" size="large">已接单: {{ stats.acceptedOrders }}</el-tag>
+            <el-tag type="warning" size="large">待支付: {{ stats.pendingOrders }}</el-tag>
+            <el-tag type="primary" size="large">已支付: {{ stats.acceptedOrders }}</el-tag>
             <el-tag type="success" size="large">已完成: {{ stats.completedOrders }}</el-tag>
           </div>
         </el-card>

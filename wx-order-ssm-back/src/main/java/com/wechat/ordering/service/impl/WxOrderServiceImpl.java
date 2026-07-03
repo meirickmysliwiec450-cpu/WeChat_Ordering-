@@ -49,7 +49,7 @@ public class WxOrderServiceImpl implements WxOrderService {
         // 创建订单
         Order order = Order.builder()
                 .orderNo(orderNo).userId(userId).totalAmount(totalAmount)
-                .payAmount(totalAmount).payStatus(0).orderStatus(1) // 待处理
+                .payAmount(totalAmount).payStatus(0).orderStatus(3) // 待支付
                 .remark(remark).addressId(addressId)
                 .receiver(addr.getReceiver()).receiverPhone(addr.getPhone())
                 .createTime(LocalDateTime.now()).build();
@@ -121,7 +121,7 @@ public class WxOrderServiceImpl implements WxOrderService {
     public void cancel(Long userId, Long orderId) {
         Order order = orderMapper.selectById(orderId);
         if (order == null || !order.getUserId().equals(userId)) throw new RuntimeException("订单不存在");
-        if (order.getOrderStatus() != 1) throw new RuntimeException("只有待处理状态的订单才能取消");
+        if (order.getOrderStatus() != 3) throw new RuntimeException("只有待支付状态的订单才能取消");
         order.setOrderStatus(0); // 已取消
         orderMapper.update(order);
     }

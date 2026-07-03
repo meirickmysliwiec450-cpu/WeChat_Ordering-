@@ -1,5 +1,6 @@
 package com.wechat.ordering.service.impl;
 
+import com.wechat.ordering.config.AppConfig;
 import com.wechat.ordering.entity.*;
 import com.wechat.ordering.mapper.*;
 import com.wechat.ordering.service.RecommendService;
@@ -79,26 +80,44 @@ public class RecommendServiceImpl implements RecommendService {
                 });
         }
 
-        // 5. 构建候选菜品列表
+        // 5. 构建候选菜品列表（含描述和营养信息，让AI有料可写）
         StringBuilder candidates = new StringBuilder();
         for (Dish d : allDishes) {
             Category cat = categoryMap.get(d.getCategoryId());
             String catName = cat != null ? cat.getCategoryName() : "";
             candidates.append("- ").append(d.getDishName())
-                      .append("（").append(catName)
-                      .append("，¥").append(d.getPrice()).append("）\n");
+                      .append("【").append(catName)
+                      .append("，¥").append(d.getPrice())
+                      .append("，月销").append(d.getSales() != null ? d.getSales() : 0).append("单");
+            if (d.getDescription() != null && !d.getDescription().isEmpty()) {
+                candidates.append("，").append(d.getDescription());
+            }
+            if (d.getCalories() != null && d.getCalories() > 0) {
+                candidates.append("，热量").append(d.getCalories()).append("千卡");
+            }
+            candidates.append("】\n");
         }
 
         // 6. 调用大模型API
         String prompt = String.format(
-            "你是一个美食推荐助手。根据用户的历史点餐记录和当前时段，从候选菜品中推荐3道菜品。\n\n" +
+            "你是一位资深美食评论家，请根据用户的历史点餐记录和当前时段，从候选菜品中精心推荐3道菜品。\n\n" +
             "当前时段：%s\n\n" +
             "用户历史点餐：\n%s\n" +
             "候选菜品：\n%s\n" +
-            "请根据以下原则推荐：\n" +
+            "推荐原则：\n" +
             "1. 结合历史偏好，推荐用户可能喜欢但还没吃腻的\n" +
-            "2. 考虑当前时段，推荐合适的菜品（早餐清淡、午餐营养、晚餐适量）\n" +
-            "3. 适当推荐不同分类的菜品，营养搭配\n\n" +
+            "2. 考虑当前时段，推荐合适的菜品\n" +
+            "3. 3道菜品应来自不同分类，营养搭配均衡\n\n" +
+            "推荐理由写作要求：\n" +
+            "- 【风格差异】3条推荐理由必须风格迥异、各有千秋，严禁套用相同句式模板\n" +
+            "- 【紧扣食材】从菜品本身的食材、做法、口感、风味入手，每条理由要有独特的切入角度\n" +
+            "- 【文笔优美】用美食点评的口吻写作，善用感官描写（酥脆、鲜嫩、浓郁、清爽等），让文字有画面感\n" +
+            "- 【真情实感】写得像一位懂吃的老饕在真诚分享，而非冰冷的机器推荐\n" +
+            "- 【字数】每条30~60字\n\n" +
+            "风格示例：\n" +
+            "- \"您之前钟情于川菜的麻辣鲜香，这道水煮鱼将花椒的麻与辣椒的香完美融合，鱼片嫩滑入口即化。午间来一份，开胃又提神，搭配一碗米饭便是人间至味。\"\n" +
+            "- \"清晨的胃需要温柔的唤醒——这份皮蛋瘦肉粥熬得绵密浓稠，皮蛋的醇香与瘦肉的鲜甜交相辉映，暖胃又暖心，是早餐的不二之选。\"\n" +
+            "- \"试过这道糖醋里脊吗？外酥里嫩的金黄肉条裹着酸甜适口的酱汁，一口下去咔嚓作响，幸福感瞬间拉满。作为晚餐的硬菜，搭配清炒时蔬营养刚刚好。\"\n\n" +
             "请严格按JSON格式返回（不要包含markdown代码块标记）：\n" +
             "{\"dishes\":[{\"dishName\":\"菜品名\",\"reason\":\"推荐理由\"},...]}",
             period, history.toString(), candidates.toString()
@@ -145,10 +164,10 @@ public class RecommendServiceImpl implements RecommendService {
                         Map<String, Object> item = new HashMap<>();
                         item.put("id", d.getId());
                         item.put("dishName", d.getDishName());
-                        item.put("image", d.getImage());
+                        item.put("image", AppConfig.resolveImage(d.getImage()));
                         item.put("price", d.getPrice());
                         item.put("sales", d.getSales());
-                        item.put("reason", reason != null ? reason : "根据您的口味偏好推荐");
+                        item.put("reason", reason != null ? reason : buildFallbackReason(d, categoryMap, period, "hot"));
                         Category cat = categoryMap.get(d.getCategoryId());
                         if (cat != null) item.put("categoryName", cat.getCategoryName());
                         recommendList.add(item);
@@ -188,10 +207,10 @@ public class RecommendServiceImpl implements RecommendService {
                 Map<String, Object> item = new HashMap<>();
                 item.put("id", d.getId());
                 item.put("dishName", d.getDishName());
-                item.put("image", d.getImage());
+                item.put("image", AppConfig.resolveImage(d.getImage()));
                 item.put("price", d.getPrice());
                 item.put("sales", d.getSales());
-                item.put("reason", "热销推荐 · 适合" + period + "享用");
+                item.put("reason", buildFallbackReason(d, categoryMap, period, "hot"));
                 Category cat = categoryMap.get(d.getCategoryId());
                 if (cat != null) item.put("categoryName", cat.getCategoryName());
                 recommendList.add(item);
@@ -206,10 +225,10 @@ public class RecommendServiceImpl implements RecommendService {
                 Map<String, Object> item = new HashMap<>();
                 item.put("id", d.getId());
                 item.put("dishName", d.getDishName());
-                item.put("image", d.getImage());
+                item.put("image", AppConfig.resolveImage(d.getImage()));
                 item.put("price", d.getPrice());
                 item.put("sales", d.getSales());
-                item.put("reason", "根据您的口味偏好推荐");
+                item.put("reason", buildFallbackReason(d, categoryMap, period, "history"));
                 Category cat = categoryMap.get(d.getCategoryId());
                 if (cat != null) item.put("categoryName", cat.getCategoryName());
                 recommendList.add(item);
@@ -223,5 +242,77 @@ public class RecommendServiceImpl implements RecommendService {
         result.put("userName", "");
         result.put("fallback", true);
         return result;
+    }
+
+    /** 构建兜底推荐理由（多样化模板，避免雷同） */
+    private String buildFallbackReason(Dish dish, Map<Long, Category> categoryMap,
+                                        String period, String source) {
+        Category cat = categoryMap.get(dish.getCategoryId());
+        String catName = cat != null ? cat.getCategoryName() : "菜品";
+        String name = dish.getDishName();
+        int sales = dish.getSales() != null ? dish.getSales() : 0;
+
+        // 时段场景描写（多样化的意象表达）
+        String[][] periodScenes = {
+            {"早餐", "清晨的第一缕阳光", "唤醒沉睡的味蕾", "开启元气满满的一天", "晨光熹微，"},
+            {"午餐", "正午时分", "犒劳忙碌了一上午的自己", "为下午充满电", "午间小憩，"},
+            {"下午茶", "午后时光慵懒而惬意", "给疲惫的身心放个假", "偷得浮生半日闲", "午后暖阳下，"},
+            {"晚餐", "夜幕降临华灯初上", "卸下一身的疲惫", "用美食治愈一天的辛劳", "黄昏时分，"},
+            {"夜宵", "夜深人静时分", "给夜晚添一抹温柔", "夜深了，对自己好一点", "夜色温柔，"}
+        };
+        String[] scene = null;
+        for (String[] s : periodScenes) {
+            if (s[0].equals(period)) { scene = s; break; }
+        }
+        if (scene == null) scene = new String[]{"", "此刻", "犒劳一下自己", "享受当下的美好", ""};
+
+        // 用 dish.id 取模选模板，确保不同菜品用不同模板
+        int t = (int) (dish.getId() % 6);
+
+        if ("hot".equals(source)) {
+            // 热销/新发现类推荐 —— 6种迥异风格
+            switch (t) {
+                case 0:
+                    return String.format("🔥 %s这份%s已经征服了%d位食客的胃。%s来上一份，酥香鲜嫩在舌尖绽放，治愈力满分。",
+                        scene[4], name, sales, scene[1]);
+                case 1:
+                    return String.format("✨ 想吃点特别的？%s——%s中的隐藏宝藏，%s恰到好处地%s。一口下去便知何为\"值得\"。",
+                        name, catName, scene[1], scene[2]);
+                case 2:
+                    return String.format("🌟 %s在%s分类中人气爆棚并非偶然——用料讲究、火候到位，%s%s，让平凡的日子也变得闪闪发光。",
+                        name, catName, scene[4], scene[3]);
+                case 3:
+                    return String.format("💫 口碑相传的%s，累计售出%d份的好味道。%s，用一道好菜%s吧。",
+                        name, sales, scene[1], scene[2]);
+                case 4:
+                    return String.format("🎯 还没试过%s？这道%s精选之作，%s来一份，感受食材最本真的鲜美与满足。",
+                        name, catName, scene[1]);
+                default:
+                    return String.format("🍽️ %s——%s中脱颖而出的实力派，%s为身体注入能量的同时，更是一场味觉的小确幸。",
+                        name, catName, scene[1]);
+            }
+        } else {
+            // 历史偏好类推荐 —— 6种迥异风格
+            switch (t) {
+                case 0:
+                    return String.format("💚 您与%s的故事我们一直记得。%s再次与这份熟悉的美味相遇，像老朋友一样温暖而妥帖。",
+                        name, scene[4]);
+                case 1:
+                    return String.format("🥢 %s——您餐桌上的常客。%s重温经典，熟悉的味道总能带来最踏实的幸福感。",
+                        name, scene[1]);
+                case 2:
+                    return String.format("😋 念念不忘，必有回响。%s%s来一份，每一口都是记忆里那个让人微笑的味道。",
+                        scene[4], name);
+                case 3:
+                    return String.format("🏮 您钟爱的%s，%s再点一次又何妨？好东西值得反复品味，经典永不过时。",
+                        name, scene[1]);
+                case 4:
+                    return String.format("🌿 %s——熟悉又安心的选择。%s，让这份温暖的味道%s。",
+                        name, scene[4], scene[2]);
+                default:
+                    return String.format("💝 时间验证过的美味——%s。%s再来一份，有些幸福就是这么简单而确定。",
+                        name, scene[1]);
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.wechat.ordering.controller;
 
+import com.wechat.ordering.config.AppConfig;
 import com.wechat.ordering.util.Result;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,7 +40,7 @@ public class UploadController {
                     name.endsWith(".webp")) {
                     Map<String, String> item = new HashMap<>();
                     item.put("name", prefix + f.getName());
-                    item.put("url", "/images/" + prefix + f.getName());
+                    item.put("url", AppConfig.resolveImage("/images/" + prefix + f.getName()));
                     result.add(item);
                 }
             }

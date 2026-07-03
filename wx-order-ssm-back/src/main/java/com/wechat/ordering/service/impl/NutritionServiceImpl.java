@@ -107,7 +107,7 @@ public class NutritionServiceImpl implements NutritionService {
         LocalDateTime sevenDaysAgo = LocalDateTime.now().minusDays(7);
         List<Order> recentOrders = allOrders.stream()
             .filter(o -> o.getCreateTime() != null && o.getCreateTime().isAfter(sevenDaysAgo))
-            .filter(o -> o.getOrderStatus() != null && o.getOrderStatus() == 3) // 已完成的
+            .filter(o -> o.getOrderStatus() != null && o.getOrderStatus() == 2) // 已完成的
             .collect(Collectors.toList());
 
         // 统计营养摄入

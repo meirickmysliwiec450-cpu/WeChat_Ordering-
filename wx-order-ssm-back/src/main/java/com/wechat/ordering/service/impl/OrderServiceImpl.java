@@ -63,8 +63,8 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("订单不存在");
         }
         order.setOrderStatus(orderStatus);
-        // 如果订单完成，同时更新支付状态
-        if (orderStatus == 3) {
+        // 如果订单完成（状态2），同时更新支付状态
+        if (orderStatus == 2) {
             order.setPayStatus(1);
         }
         orderMapper.update(order);

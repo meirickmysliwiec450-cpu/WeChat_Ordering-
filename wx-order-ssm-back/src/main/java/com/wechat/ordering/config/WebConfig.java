@@ -7,7 +7,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Spring MVC 配置 - 跨域请求支持 + 认证拦截器 + 图片静态资源
@@ -21,16 +22,16 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private WxAuthInterceptor wxAuthInterceptor;
 
-    /** 前端 public/images 的绝对路径 */
-    private static final String IMAGES_PATH =
-        System.getProperty("user.dir") + "/../wx-order-frontend-user1/public/images";
+    /** 图片目录绝对路径 */
+    private static final String IMAGES_DIR = System.getProperty("user.dir")
+        + "/../wx-order-frontend-user1/public/images";
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 将 /images/** 映射到前端 public/images 目录，partner可通过IP访问图片
-        String absolutePath = new File(IMAGES_PATH).getAbsolutePath();
+        // 用 Path.toUri() 生成 file:/// URL，它会自动处理中文路径编码
+        Path imagePath = Paths.get(IMAGES_DIR).toAbsolutePath().normalize();
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + absolutePath + "/");
+                .addResourceLocations(imagePath.toUri().toString());
     }
 
     @Override

@@ -43,10 +43,10 @@ public class DashboardServiceImpl implements DashboardService {
                 .filter(o -> o.getCreateTime() != null && o.getCreateTime().toLocalDate().equals(today))
                 .count();
 
-        // 各状态订单数
-        long pendingOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 1).count();
-        long acceptedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 2).count();
-        long completedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 3).count();
+        // 各状态订单数: 3=待支付, 1=已支付, 2=已完成
+        long pendingOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 3).count();
+        long acceptedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 1).count();
+        long completedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 2).count();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers", totalUsers);

@@ -8,9 +8,9 @@
       </template>
       <el-descriptions v-if="order" :column="2" border>
         <el-descriptions-item label="订单状态">
-          <el-tag v-if="order.orderStatus === 1" type="warning">待处理</el-tag>
-          <el-tag v-else-if="order.orderStatus === 2" type="primary">已接单</el-tag>
-          <el-tag v-else-if="order.orderStatus === 3" type="success">已完成</el-tag>
+          <el-tag v-if="order.orderStatus === 3" type="warning">待支付</el-tag>
+          <el-tag v-else-if="order.orderStatus === 1" type="primary">已支付</el-tag>
+          <el-tag v-else-if="order.orderStatus === 2" type="success">已完成</el-tag>
           <el-tag v-else type="danger">已取消</el-tag>
         </el-descriptions-item>
         <el-descriptions-item label="支付状态">
