@@ -21,7 +21,7 @@ public class WxCommentServiceImpl implements WxCommentService {
     public void submit(Long userId, Long orderId, Integer score, String content, String photo) {
         Order order = orderMapper.selectById(orderId);
         if (order == null || !order.getUserId().equals(userId)) throw new RuntimeException("订单不存在");
-        if (order.getOrderStatus() != 3) throw new RuntimeException("只有已完成的订单才能评价");
+        if (order.getOrderStatus() != 2) throw new RuntimeException("只有已完成的订单才能评价");
 
         // 检查是否已评价
         List<OrderComment> existing = orderCommentMapper.selectByOrderId(orderId);

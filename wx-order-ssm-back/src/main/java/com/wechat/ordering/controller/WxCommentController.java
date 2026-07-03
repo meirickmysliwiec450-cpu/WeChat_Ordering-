@@ -21,14 +21,43 @@ public class WxCommentController {
     @PostMapping
     public Result<?> submit(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         Long userId = (Long) request.getAttribute("userId");
-        Long orderId = params.get("orderId") != null ? ((Number) params.get("orderId")).longValue() : null;
-        Integer score = params.get("score") != null ? (Integer) params.get("score") : null;
-        String content = (String) params.get("content");
-        String photo = (String) params.get("photo");
-        if (orderId == null) return Result.error("orderId不能为空");
-        if (score == null) return Result.error("评分不能为空");
+
+        // 处理前端字符串格式的 id
+        Object idObj = params.get("id");
+        Long id = null;
         try {
-            wxCommentService.submit(userId, orderId, score, content, photo);
+            if (idObj != null) {
+                String idStr = idObj.toString().trim();
+                if (!idStr.isEmpty()) {
+                    id = Long.parseLong(idStr);
+                }
+            }
+        } catch (NumberFormatException e) {
+            return Result.error("订单id必须是合法数字");
+        }
+
+        if (id == null) return Result.error("id不能为空");
+
+        // 兼容字符串/数字类型的score
+        Object scoreObj = params.get("score");
+        Integer score = null;
+        try {
+            if (scoreObj != null) {
+                String scoreStr = scoreObj.toString().trim();
+                if (!scoreStr.isEmpty()) {
+                    score = Integer.parseInt(scoreStr);
+                }
+            }
+        } catch (NumberFormatException e) {
+            return Result.error("评分必须是数字");
+        }
+        if (score == null) return Result.error("评分不能为空");
+
+        String content = params.get("content") == null ? "" : params.get("content").toString();
+        String photo = params.get("photo") == null ? "" : params.get("photo").toString();
+
+        try {
+            wxCommentService.submit(userId, id, score, content, photo);
             return Result.success();
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
@@ -36,8 +65,8 @@ public class WxCommentController {
     }
 
     /** 查看某订单的评价 */
-    @GetMapping("/order/{orderId}")
-    public Result<List<OrderComment>> getByOrderId(@PathVariable Long orderId) {
-        return Result.success(wxCommentService.getByOrderId(orderId));
+    @GetMapping("/order/{id}")
+    public Result<List<OrderComment>> getByOrderId(@PathVariable Long id) {
+        return Result.success(wxCommentService.getByOrderId(id));
     }
 }
