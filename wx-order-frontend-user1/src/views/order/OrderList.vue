@@ -4,9 +4,9 @@
     <el-card>
       <div class="toolbar">
         <el-select v-model="filterStatus" placeholder="按状态筛选" clearable @change="fetchData">
-          <el-option label="待处理" :value="1" />
-          <el-option label="已接单" :value="2" />
-          <el-option label="已完成" :value="3" />
+          <el-option label="待支付" :value="3" />
+          <el-option label="已支付" :value="1" />
+          <el-option label="已完成" :value="2" />
         </el-select>
       </div>
       <el-table :data="orders" stripe v-loading="loading">
@@ -18,9 +18,9 @@
         <el-table-column prop="receiverPhone" label="联系电话" width="130" />
         <el-table-column prop="orderStatus" label="订单状态" width="100">
           <template #default="{ row }">
-            <el-tag v-if="row.orderStatus === 1" type="warning">待处理</el-tag>
-            <el-tag v-else-if="row.orderStatus === 2" type="primary">已接单</el-tag>
-            <el-tag v-else-if="row.orderStatus === 3" type="success">已完成</el-tag>
+            <el-tag v-if="row.orderStatus === 3" type="warning">待支付</el-tag>
+            <el-tag v-else-if="row.orderStatus === 1" type="primary">已支付</el-tag>
+            <el-tag v-else-if="row.orderStatus === 2" type="success">已完成</el-tag>
             <el-tag v-else type="danger">已取消</el-tag>
           </template>
         </el-table-column>
@@ -35,9 +35,9 @@
         <el-table-column label="操作" width="250">
           <template #default="{ row }">
             <el-button type="primary" size="small" @click="$router.push(`/orders/${row.id}`)">详情</el-button>
-            <el-button v-if="row.orderStatus === 1" type="success" size="small" @click="handleStatus(row.id, 2)">接单</el-button>
-            <el-button v-if="row.orderStatus === 2" type="warning" size="small" @click="handleStatus(row.id, 3)">完成</el-button>
-            <el-button v-if="row.orderStatus === 1" type="danger" size="small" @click="handleStatus(row.id, 0)">拒单</el-button>
+            <el-button v-if="row.orderStatus === 3" type="success" size="small" @click="handleStatus(row.id, 1)">确认支付</el-button>
+            <el-button v-if="row.orderStatus === 1" type="warning" size="small" @click="handleStatus(row.id, 2)">完成</el-button>
+            <el-button v-if="row.orderStatus === 3" type="danger" size="small" @click="handleStatus(row.id, 0)">拒单</el-button>
           </template>
         </el-table-column>
       </el-table>
