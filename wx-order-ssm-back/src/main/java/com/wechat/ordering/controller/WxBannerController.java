@@ -1,5 +1,6 @@
 package com.wechat.ordering.controller;
 
+import com.wechat.ordering.config.AppConfig;
 import com.wechat.ordering.entity.Banner;
 import com.wechat.ordering.mapper.BannerMapper;
 import com.wechat.ordering.util.Result;
@@ -18,6 +19,8 @@ public class WxBannerController {
     /** 获取启用的轮播图列表 */
     @GetMapping
     public Result<List<Banner>> list() {
-        return Result.success(bannerMapper.selectByStatus(1));
+        List<Banner> banners = bannerMapper.selectByStatus(1);
+        banners.forEach(b -> b.setImageUrl(AppConfig.resolveImage(b.getImageUrl())));
+        return Result.success(banners);
     }
 }

@@ -19,8 +19,12 @@ public class WxUserServiceImpl implements WxUserService {
 
     @Override
     public Map<String, Object> login(String openId, String nickName, String avatar, Integer gender) {
+        System.out.println("  [WxUserService] 开始处理登录，openId: " + openId);
+        
         User user = userMapper.selectByOpenId(openId);
+        
         if (user == null) {
+            System.out.println("  [WxUserService] 新用户，准备注册...");
             // 新用户注册
             user = User.builder()
                     .openId(openId)
@@ -30,9 +34,15 @@ public class WxUserServiceImpl implements WxUserService {
                     .status(1)
                     .createTime(LocalDateTime.now())
                     .build();
-            userMapper.insert(user);
+            
+            System.out.println("  [WxUserService] 准备插入用户数据：" + user);
+            int insertResult = userMapper.insert(user);
+            System.out.println("  [WxUserService] 插入结果影响行数：" + insertResult);
+            
             user = userMapper.selectByOpenId(openId); // 获取自增ID
+            System.out.println("  [WxUserService] 注册成功！新用户ID: " + (user != null ? user.getId() : "null"));
         } else {
+            System.out.println("  [WxUserService] 老用户登录，用户ID: " + user.getId());
             // 老用户更新信息
             if (nickName != null) user.setNickName(nickName);
             if (avatar != null) user.setAvatar(avatar);
@@ -43,6 +53,11 @@ public class WxUserServiceImpl implements WxUserService {
         Map<String, Object> result = new HashMap<>();
         result.put("token", token);
         result.put("user", user);
+        
+        System.out.println("  [WxUserService] 登录处理完成！");
+        System.out.println("  [WxUserService] 用户ID: " + user.getId());
+        System.out.println("  [WxUserService] 生成的Token（前50字符）: " + (token.length() > 50 ? token.substring(0, 50) + "..." : token));
+        System.out.println("  [WxUserService] 返回完整结果: " + result);
         return result;
     }
 

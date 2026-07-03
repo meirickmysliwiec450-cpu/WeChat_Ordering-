@@ -17,8 +17,9 @@ import java.io.OutputStream;
 @Component
 public class ImageFilter implements Filter {
 
-    /** 图片根目录 —— 硬编码绝对路径，不依赖 user.dir，路径无中文 */
-    private static final File IMG_ROOT = new File("E:/wechat_images");
+    /** 图片根目录 —— 指向商家前端的 public/images 目录 */
+    // 使用绝对路径，确保能找到文件！
+    private static final File IMG_ROOT = new File("E:\\综合课程设计Ⅲ\\WechatOrdering\\wx-order-frontend-user1\\public\\images").getAbsoluteFile();
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -31,23 +32,40 @@ public class ImageFilter implements Filter {
         String ctx = request.getContextPath();          // /api
         String prefix = ctx + "/images/";               // /api/images/
 
+        System.out.println("========== ImageFilter 收到请求 ==========");
+        System.out.println("请求URI：" + uri);
+        System.out.println("ContextPath：" + ctx);
+        System.out.println("图片根目录：" + IMG_ROOT.getAbsolutePath());
+        System.out.println("图片根目录是否存在：" + IMG_ROOT.exists());
+
         // 不是图片请求，放行给 Spring MVC
         if (!uri.startsWith(prefix) || uri.length() <= prefix.length()) {
+            System.out.println("不是图片请求，放行");
+            System.out.println("====================================");
             chain.doFilter(req, res);
             return;
         }
 
         // 提取相对路径：/api/images/noodles/test.png → noodles/test.png
         String relativePath = uri.substring(prefix.length());
+        System.out.println("提取的相对路径：" + relativePath);
 
         // 安全检查
         if (relativePath.contains("..") || relativePath.contains("\\")) {
+            System.out.println("路径不安全，返回403");
+            System.out.println("====================================");
             response.sendError(403);
             return;
         }
 
         File file = new File(IMG_ROOT, relativePath);
+        System.out.println("完整文件路径：" + file.getAbsolutePath());
+        System.out.println("文件是否存在：" + file.exists());
+        System.out.println("是否是文件：" + file.isFile());
+
         if (!file.exists() || !file.isFile()) {
+            System.out.println("文件不存在或不是文件，返回404");
+            System.out.println("====================================");
             response.sendError(404);
             return;
         }
@@ -59,6 +77,9 @@ public class ImageFilter implements Filter {
         else if (name.endsWith(".gif")) response.setContentType("image/gif");
         else if (name.endsWith(".webp")) response.setContentType("image/webp");
         else response.setContentType("application/octet-stream");
+
+        System.out.println("文件存在，开始输出图片");
+        System.out.println("====================================");
 
         // 输出文件内容
         try (FileInputStream fis = new FileInputStream(file);

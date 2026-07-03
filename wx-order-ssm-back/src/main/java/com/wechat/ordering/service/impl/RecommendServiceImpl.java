@@ -188,6 +188,110 @@ public class RecommendServiceImpl implements RecommendService {
         }
     }
 
+    @Override
+    public Map<String, Object> recommendByChat(Long userId, String message) {
+        // 获取所有上架菜品
+        List<Dish> allDishes = dishMapper.selectByStatus(1);
+        Map<Long, Category> categoryMap = new HashMap<>();
+        for (Category c : categoryMapper.selectAll()) categoryMap.put(c.getId(), c);
+
+        // 构建候选菜品列表
+        StringBuilder candidates = new StringBuilder();
+        for (Dish d : allDishes) {
+            Category cat = categoryMap.get(d.getCategoryId());
+            String catName = cat != null ? cat.getCategoryName() : "";
+            candidates.append("- ").append(d.getDishName())
+                      .append("【").append(catName)
+                      .append("，¥").append(d.getPrice())
+                      .append("，月销").append(d.getSales() != null ? d.getSales() : 0).append("单");
+            if (d.getDescription() != null && !d.getDescription().isEmpty()) {
+                candidates.append("，").append(d.getDescription());
+            }
+            candidates.append("】\n");
+        }
+
+        // 构建提示词：根据用户偏好推荐
+        int hour = LocalTime.now().getHour();
+        String period;
+        if (hour >= 6 && hour < 10) period = "早餐";
+        else if (hour >= 10 && hour < 14) period = "午餐";
+        else if (hour >= 14 && hour < 17) period = "下午茶";
+        else if (hour >= 17 && hour < 21) period = "晚餐";
+        else period = "夜宵";
+
+        String prompt = String.format(
+            "你是餐厅的AI点餐助手。当前是%s时段。用户说：\"%s\"\n\n" +
+            "本店菜品：\n%s\n" +
+            "请根据用户的口味偏好和需求，从本店菜品中推荐3道最匹配的菜品。\n" +
+            "推荐要求：\n" +
+            "- 推荐理由要结合用户说的偏好，说明为什么适合TA\n" +
+            "- 每条理由30~60字，风格各异，用美食点评的口吻\n" +
+            "- 如果没有完全匹配的，选最接近的并说明原因\n\n" +
+            "严格按JSON返回：\n" +
+            "{\"dishes\":[{\"dishName\":\"菜品名\",\"reason\":\"推荐理由\"},...]}",
+            period, message, candidates.toString()
+        );
+
+        try {
+            Map<String, Object> reqBody = new HashMap<>();
+            reqBody.put("model", aiModel);
+            reqBody.put("temperature", 0.7);
+            reqBody.put("max_tokens", 800);
+            List<Map<String, String>> messages = new ArrayList<>();
+            Map<String, String> userMsg = new HashMap<>();
+            userMsg.put("role", "user"); userMsg.put("content", prompt);
+            messages.add(userMsg);
+            reqBody.put("messages", messages);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Bearer " + aiApiKey);
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(reqBody, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(aiApiUrl, entity, String.class);
+            String content = objectMapper.readTree(response.getBody())
+                .get("choices").get(0).get("message").get("content").asText();
+
+            if (content.startsWith("```")) {
+                content = content.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
+            }
+
+            Map<String, Object> aiResult = objectMapper.readValue(content, Map.class);
+            @SuppressWarnings("unchecked")
+            List<Map<String, Object>> aiDishes = (List<Map<String, Object>>) aiResult.get("dishes");
+
+            List<Map<String, Object>> recommendList = new ArrayList<>();
+            for (Map<String, Object> aiDish : aiDishes) {
+                String name = (String) aiDish.get("dishName");
+                String reason = (String) aiDish.get("reason");
+                for (Dish d : allDishes) {
+                    if (d.getDishName().contains(name) || name.contains(d.getDishName())) {
+                        Map<String, Object> item = new HashMap<>();
+                        item.put("id", d.getId());
+                        item.put("dishName", d.getDishName());
+                        item.put("image", AppConfig.resolveImage(d.getImage()));
+                        item.put("price", d.getPrice());
+                        item.put("sales", d.getSales());
+                        item.put("reason", reason != null ? reason : "根据您的偏好为您推荐这道菜");
+                        Category cat = categoryMap.get(d.getCategoryId());
+                        if (cat != null) item.put("categoryName", cat.getCategoryName());
+                        recommendList.add(item);
+                        break;
+                    }
+                }
+            }
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("period", period);
+            result.put("dishes", recommendList);
+            result.put("userMessage", message);
+            return result;
+        } catch (Exception e) {
+            // 兜底：返回热销菜品
+            return fallbackRecommend(allDishes, categoryMap, period, new HashMap<>());
+        }
+    }
+
     /** 兜底推荐：API失败时根据历史记录简单推荐 */
     private Map<String, Object> fallbackRecommend(List<Dish> allDishes, Map<Long, Category> categoryMap,
                                                    String period, Map<Long, Integer> dishCount) {

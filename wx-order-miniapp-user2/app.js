@@ -3,6 +3,7 @@ App({
     shopName: '校园风味点餐',
     servicePhone: '400-888-0000',
     // 请根据你的后端服务地址修改，例如：http://localhost:8080 或 https://api.example.com
+    // 本机测试用 localhost，真机调试用局域网IP
     baseUrl: 'http://localhost:8080/api'
   },
 

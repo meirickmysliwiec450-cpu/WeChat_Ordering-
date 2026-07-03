@@ -22,27 +22,50 @@ public class WxUserController {
     /** 微信登录/注册：前端传code，后端换取openId */
     @PostMapping("/login")
     public Result<Map<String, Object>> login(@RequestBody Map<String, Object> params) {
+        System.out.println("========== 收到登录请求 ==========");
+        System.out.println("请求参数：" + params);
+        
         try {
-            // 1. 获取前端传来的code
-            String code = (String) params.get("code");
-            if (code == null || code.isEmpty()) {
-                return Result.error("登录code不能为空");
+            String openId = null;
+            
+            // 1. 先检查是否有直接传入的 openId（用于开发测试/答辩演示）
+            String testOpenId = (String) params.get("openId");
+            if (testOpenId != null && !testOpenId.isEmpty()) {
+                System.out.println("✓ 使用测试openId登录：" + testOpenId);
+                openId = testOpenId;
+            } else {
+                // 2. 正式微信登录流程
+                String code = (String) params.get("code");
+                if (code == null || code.isEmpty()) {
+                    return Result.error("登录code不能为空");
+                }
+                // 调用微信接口拿openId
+                Map<String, String> wxSession = wxMiniUtil.getSessionByCode(code);
+                openId = wxSession.get("openid");
+                if (openId == null || openId.isEmpty()) {
+                    return Result.error("获取openId失败，微信返回信息：" + wxSession);
+                }
+                System.out.println("✓ 微信登录成功，openId：" + openId);
             }
-            // 2. 调用微信接口拿openId
-            Map<String, String> wxSession = wxMiniUtil.getSessionByCode(code);
-            String openId = wxSession.get("openid");
-            if (openId == null || openId.isEmpty()) {
-                return Result.error("获取openId失败，微信返回信息：" + wxSession);
-            }
+            
             // 3. 处理用户信息
             String nickName = (String) params.get("nickName");
             String avatar = (String) params.get("avatar");
             Integer gender = params.get("gender") != null ? (Integer) params.get("gender") : null;
+            
+            System.out.println("用户信息 - nickName: " + nickName + ", avatar: " + avatar);
+            
             // 4. 执行业务登录
-            return Result.success(wxUserService.login(openId, nickName, avatar, gender));
+            Map<String, Object> result = wxUserService.login(openId, nickName, avatar, gender);
+            System.out.println("✓ 登录成功，返回结果：" + result);
+            System.out.println("========== 登录完成 ==========");
+            
+            return Result.success(result);
         } catch (Exception e) {
             // 打印完整报错，方便你看问题
+            System.out.println("✗ 登录异常：");
             e.printStackTrace();
+            System.out.println("========== 登录失败 ==========");
             return Result.error("登录异常：" + e.getMessage());
         }
     }

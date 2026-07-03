@@ -1,7 +1,16 @@
 -- ============================================================
--- 将菜品图片路径从中文改为英文
+-- 将菜品 + 轮播图图片路径从中文改为英文
 -- 在 MySQL 客户端（Navicat/HeidiSQL/命令行）中执行
 -- ============================================================
+
+-- ==================== 轮播图表 t_banner ====================
+UPDATE t_banner SET `image-url` = '/images/drinks/grape_drink.png'    WHERE `image-url` LIKE '%多肉葡萄冰萃%';
+UPDATE t_banner SET `image-url` = '/images/colddishes/garlic_pork.png' WHERE `image-url` LIKE '%蒜泥白肉%';
+
+-- 验证轮播图
+SELECT id, title, `image-url` FROM t_banner;
+
+-- ==================== 菜品表 t_dish ====================
 
 USE wechat_ordering;
 

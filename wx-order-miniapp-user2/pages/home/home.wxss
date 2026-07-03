@@ -1,132 +1,39 @@
-.hero {
-  min-height: 260rpx;
-  border-radius: 30rpx;
-  padding: 34rpx;
-  box-sizing: border-box;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  background: linear-gradient(135deg, #c01818 0%, #e26a2c 100%);
-  box-shadow: 0 16rpx 36rpx rgba(192, 24, 24, 0.22);
-}
+.page { background: #f5f5f5; padding-bottom: 20rpx; }
 
-.hello,
-.shop,
-.hero-sub {
-  display: block;
+/* ========== 顶部轮播 ========== */
+.top-section { margin: 0 20rpx; padding-top: 20rpx; }
+.top-badge { font-size: 26rpx; color: #888; margin-bottom: 12rpx; padding-left: 6rpx; }
+.swiper { width: 100%; height: 360rpx; border-radius: 20rpx; overflow: hidden; box-shadow: 0 6rpx 24rpx rgba(0,0,0,0.12); }
+.swiper-slide { width: 100%; height: 100%; position: relative; }
+.swiper-img { width: 100%; height: 100%; }
+.swiper-info {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: 30rpx 28rpx 20rpx;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  display: flex; justify-content: space-between; align-items: flex-end;
 }
+.swiper-name { color: #fff; font-size: 34rpx; font-weight: 700; }
+.swiper-price { color: #ffd54f; font-size: 32rpx; font-weight: 800; }
 
-.hello {
-  font-size: 28rpx;
-  opacity: 0.9;
-}
+/* ========== 用餐方式 ========== */
+.card { background: #fff; border-radius: 18rpx; margin: 20rpx; padding: 24rpx; }
+.dining-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20rpx; }
+.dining-title { font-size: 30rpx; font-weight: 700; }
+.dining-current { font-size: 24rpx; color: #c01818; background: #fff2ec; padding: 6rpx 16rpx; border-radius: 20rpx; }
+.dining-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; }
+.dining-opt { border: 2rpx solid #eee; border-radius: 16rpx; padding: 28rpx 20rpx; text-align: center; background: #fafafa; transition: all 0.2s; }
+.dining-opt.active { border-color: #c01818; background: #fff2ec; }
+.opt-icon { font-size: 44rpx; display: block; }
+.opt-name { font-size: 28rpx; font-weight: 700; color: #333; display: block; margin-top: 8rpx; }
+.opt-desc { font-size: 22rpx; color: #999; display: block; margin-top: 4rpx; }
+.start-btn { width: 100%; margin-top: 20rpx; height: 80rpx; line-height: 80rpx; font-size: 30rpx; font-weight: 700; color: #fff; background: linear-gradient(135deg, #c01818, #e04030); border-radius: 40rpx; border: none; }
+.start-btn[disabled] { background: #ddd; color: #999; }
 
-.shop {
-  margin-top: 10rpx;
-  font-size: 46rpx;
-  font-weight: 800;
-}
+/* ========== 快捷入口 ========== */
+.quick-row { display: flex; margin: 0 20rpx; gap: 16rpx; }
+.quick-item { flex: 1; text-align: center; background: #fff; border-radius: 16rpx; padding: 28rpx 0; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03); }
+.quick-icon { font-size: 40rpx; display: block; }
+.quick-text { font-size: 24rpx; color: #666; display: block; margin-top: 8rpx; }
 
-.hero-sub {
-  margin-top: 14rpx;
-  font-size: 26rpx;
-  opacity: 0.9;
-}
-
-.mode-card {
-  margin-top: -34rpx;
-}
-
-.mode-title,
-.mode-desc,
-.mode-name,
-.mode-sub {
-  display: block;
-}
-
-.mode-title {
-  font-size: 32rpx;
-  font-weight: 800;
-}
-
-.mode-desc,
-.mode-sub {
-  margin-top: 10rpx;
-  color: #888888;
-  font-size: 24rpx;
-}
-
-.mode-options {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18rpx;
-  margin-top: 24rpx;
-}
-
-.mode-option {
-  border: 2rpx solid #eeeeee;
-  border-radius: 22rpx;
-  padding: 24rpx;
-  background: #fafafa;
-}
-
-.mode-option.active {
-  border-color: #c01818;
-  background: #fff2ec;
-}
-
-.mode-name {
-  font-size: 30rpx;
-  font-weight: 800;
-  color: #333333;
-}
-
-.start-btn {
-  width: 100%;
-  margin-top: 24rpx;
-}
-
-.search {
-  margin-top: 24rpx;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 92rpx;
-}
-
-.search-placeholder {
-  color: #999999;
-  font-size: 27rpx;
-}
-
-.search-btn {
-  color: #c01818;
-  font-weight: 700;
-}
-
-.feature-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18rpx;
-  margin-top: 24rpx;
-}
-
-.feature {
-  min-height: 138rpx;
-}
-
-.feature-title,
-.feature-desc {
-  display: block;
-}
-
-.feature-title {
-  font-size: 30rpx;
-  font-weight: 700;
-}
-
-.feature-desc {
-  margin-top: 14rpx;
-  color: #888888;
-  font-size: 24rpx;
-}
+/* ========== 热销 ========== */
+.section-title { font-size: 30rpx; font-weight: 700; padding: 30rpx 24rpx 10rpx; color: #333; }

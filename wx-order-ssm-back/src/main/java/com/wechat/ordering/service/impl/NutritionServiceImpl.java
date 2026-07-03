@@ -59,8 +59,10 @@ public class NutritionServiceImpl implements NutritionService {
         sysMsg.put("role", "system"); sysMsg.put("content", systemPrompt);
         messages.add(sysMsg);
 
-        // 历史对话（取最近10轮）
-        for (Conversation c : history.subList(Math.max(0, history.size() - 10), history.size())) {
+        // 历史对话（取最近10轮，null安全处理）
+        if (history == null) history = new ArrayList<>();
+        int fromIndex = Math.max(0, history.size() - 10);
+        for (Conversation c : history.subList(fromIndex, history.size())) {
             Map<String, String> m = new HashMap<>();
             m.put("role", c.getRole()); m.put("content", c.getContent());
             messages.add(m);

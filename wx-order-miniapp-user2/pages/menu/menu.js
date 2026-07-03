@@ -48,12 +48,9 @@ Page({
   // ========== 获取分类 ==========
 
   loadCategories() {
-    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    if (!baseUrl) {
-      this.useFallbackCategories()
-      return
-    }
-
+    // 强制使用正确的地址，避免缓存问题
+    const baseUrl = (getApp().globalData.baseUrl || 'http://localhost:8080/api').replace(/\/$/, '')
+    
     wx.request({
       url: `${baseUrl}/wx/categories`,
       method: 'GET',
@@ -117,12 +114,9 @@ Page({
     const categoryId = this.data.activeCategory
     if (!categoryId) return
 
-    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    if (!baseUrl) {
-      this.useFallbackDishes()
-      return
-    }
-
+    // 强制使用正确的地址，避免缓存问题
+    const baseUrl = (getApp().globalData.baseUrl || 'http://localhost:8080/api').replace(/\/$/, '')
+    
     wx.showLoading({ title: '加载中' })
 
     wx.request({

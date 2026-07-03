@@ -1,13 +1,14 @@
 const { dishes } = require('../../utils/mock')
 const { addToCart, getDiningType, setDiningType, getDiningTypeText } = require('../../utils/store')
-const { requireLogin } = require('../../utils/auth')
+const { requireLogin, getToken, buildUrl } = require('../../utils/auth')
 
 Page({
   data: {
     shopName: '校园风味点餐',
     hotDishes: [],
     diningType: '',
-    diningTypeText: '未选择'
+    diningTypeText: '未选择',
+    dishList: []
   },
 
   onLoad() {
@@ -20,21 +21,33 @@ Page({
   onShow() {
     requireLogin()
     this.refreshDiningType()
+    this.fetchDishes()
+  },
+
+  fetchDishes() {
+    const token = getToken()
+    if (!token) return
+    wx.request({
+      url: buildUrl('/wx/dishes'),
+      method: 'GET',
+      header: { Authorization: `Bearer ${token}` },
+      success: res => {
+        if (res.data && res.data.code === 200) {
+          this.setData({ dishList: res.data.data || [] })
+        }
+      }
+    })
   },
 
   refreshDiningType() {
     const diningType = getDiningType()
-    this.setData({
-      diningType,
-      diningTypeText: diningType ? getDiningTypeText(diningType) : '未选择'
-    })
+    this.setData({ diningType, diningTypeText: diningType ? getDiningTypeText(diningType) : '未选择' })
   },
 
-  selectDiningType(event) {
-    const type = event.currentTarget.dataset.type
-    setDiningType(type)
+  selectDiningType(e) {
+    setDiningType(e.currentTarget.dataset.type)
     this.refreshDiningType()
-    wx.showToast({ title: `已选择${getDiningTypeText(type)}`, icon: 'success' })
+    wx.showToast({ title: `已选择${getDiningTypeText(e.currentTarget.dataset.type)}`, icon: 'success' })
   },
 
   startOrder() {
@@ -45,16 +58,12 @@ Page({
     wx.switchTab({ url: '/pages/menu/menu' })
   },
 
-  goSearch() {
-    wx.navigateTo({ url: '/pages/search/search' })
-  },
+  goSearch() { wx.navigateTo({ url: '/pages/search/search' }) },
+  goMenu() { this.startOrder() },
+  goOrders() { wx.switchTab({ url: '/pages/orders/orders' }) },
 
-  goMenu() {
-    this.startOrder()
-  },
-
-  goOrders() {
-    wx.switchTab({ url: '/pages/orders/orders' })
+  goDishDetail(e) {
+    wx.navigateTo({ url: `/pages/dish_detail/dish_detail?id=${e.currentTarget.dataset.id}` })
   },
 
   addCart(event) {

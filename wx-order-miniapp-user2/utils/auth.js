@@ -25,7 +25,7 @@ function requireLogin() {
 }
 
 function buildUrl(path) {
-  const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+  const baseUrl = (getApp().globalData.baseUrl || 'http://localhost:8080/api').replace(/\/$/, '')
   return `${baseUrl}${path}`
 }
 
@@ -40,50 +40,95 @@ function normalizeLoginResult(responseData) {
 
 function loginByCode() {
   return new Promise((resolve, reject) => {
-    wx.login({
-      success(loginRes) {
-        console.log("wx.login获取的code：", loginRes.code)
-        if (!loginRes.code) {
-          reject(new Error('获取微信登录 code 失败'))
-          return
-        }
-
-        wx.request({
-          url: buildUrl('/wx/user/login'),
-          method: 'POST',
-          header: {
-            'content-type': 'application/json'
-          },
-          data: {
-            code: loginRes.code // 仅传code，后端用code+appid+secret调微信api拿openid
-          },
-          success(res) {
-            console.log("登录接口完整返回：", res)
-            // 后端业务异常（500、提示openId为空）
-            if (res.data.code !== 200) {
-              reject(new Error(res.data.message || "登录失败"))
-              return
-            }
-
-            const result = normalizeLoginResult(res.data)
-            if (!result.token) {
-              reject(new Error('登录接口未返回 token'))
-              return
-            }
-
-            wx.setStorageSync('token', result.token)
-            wx.setStorageSync('userInfo', result.userInfo || {})
-            resolve(result)
-          },
-          fail(error) {
-            reject(error)
+    // ========== 配置：可切换正式/测试模式 ==========
+    const USE_TEST_MODE = true; // true=测试模式(直接传openId)，false=正式微信登录
+    
+    if (USE_TEST_MODE) {
+      // 测试模式：直接传openId，不用调用微信接口
+      console.log("========== 开始测试模式登录 ==========")
+      const testOpenId = 'test-openid-' + Date.now()
+      const testNickName = '答辩演示用户'
+      
+      console.log("测试openId：", testOpenId)
+      
+      wx.request({
+        url: buildUrl('/wx/user/login'),
+        method: 'POST',
+        header: {
+          'content-type': 'application/json'
+        },
+        data: {
+          openId: testOpenId,
+          nickName: testNickName,
+          avatar: ''
+        },
+        success(res) {
+          console.log("========== 登录接口响应 ==========")
+          console.log("完整响应：", res)
+          console.log("响应数据：", res.data)
+          
+          if (res.data.code !== 200) {
+            reject(new Error(res.data.message || "登录失败"))
+            return
           }
-        })
-      },
-      fail(error) {
-        reject(error)
-      }
-    })
+          
+          const result = normalizeLoginResult(res.data)
+          console.log("解析结果：", result)
+          
+          wx.setStorageSync('token', result.token)
+          wx.setStorageSync('userInfo', result.userInfo || {})
+          
+          console.log("已保存token到Storage：", result.token)
+          console.log("已保存userInfo到Storage：", result.userInfo)
+          
+          resolve(result)
+        },
+        fail(error) {
+          console.log("========== 登录接口失败 ==========")
+          console.log("错误：", error)
+          reject(error)
+        }
+      })
+    } else {
+      // 正式微信登录
+      wx.login({
+        success(loginRes) {
+          console.log("wx.login获取的code：", loginRes.code)
+          if (!loginRes.code) {
+            reject(new Error('获取微信登录 code 失败'))
+            return
+          }
+
+          wx.request({
+            url: buildUrl('/wx/user/login'),
+            method: 'POST',
+            header: {
+              'content-type': 'application/json'
+            },
+            data: {
+              code: loginRes.code
+            },
+            success(res) {
+              console.log("登录接口完整返回：", res)
+              if (res.data.code !== 200) {
+                reject(new Error(res.data.message || "登录失败"))
+                return
+              }
+              const result = normalizeLoginResult(res.data)
+              wx.setStorageSync('token', result.token)
+              wx.setStorageSync('userInfo', result.userInfo || {})
+              resolve(result)
+            },
+            fail(error) {
+              reject(error)
+            }
+          })
+        },
+        fail(error) {
+          reject(error)
+        }
+      })
+    }
   })
 }
 
@@ -98,5 +143,6 @@ module.exports = {
   isLoggedIn,
   requireLogin,
   loginByCode,
-  logout
+  logout,
+  buildUrl
 }

@@ -32,15 +32,17 @@ Page({
   },
 
   refreshOrders() {
+    console.log('========== 开始刷新订单列表 ==========')
+    
     const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    if (!baseUrl) {
-      this.useLocalOrders()
-      return
-    }
-
+    const fullUrl = `${baseUrl}/wx/orders`
+    console.log('请求地址：', fullUrl)
+    console.log('当前Token：', getToken())
+    console.log('当前Tab：', this.data.activeTab)
+    
     this.setData({ loading: true })
     wx.request({
-      url: `${baseUrl}/wx/orders`,
+      url: fullUrl,
       method: 'GET',
       // 核心修复：把字符串tab转数字传给后端
       data: this.data.activeTab === 'all' 
@@ -50,19 +52,29 @@ Page({
         Authorization: getToken() ? `Bearer ${getToken()}` : ''
       },
       success: res => {
+        console.log('========== 订单列表接口响应 ==========')
+        console.log('状态码：', res.statusCode)
+        console.log('完整响应：', res)
+        
         const ok = res.statusCode >= 200 && res.statusCode < 300
         if (!ok) {
+          console.log('响应不是2xx，使用本地订单')
           this.useLocalOrders()
           return
         }
 
         // 打印日志方便调试，可后续删除
         console.log('接口原始返回res.data', res.data)
-        const orders = this.normalizeOrders(res.data)
-        console.log('解析完成订单列表', orders)
-        this.setData({ loading: false, orders: orders })
+        const apiOrders = this.normalizeOrders(res.data)
+        // 合并本地订单（后端没保存的订单也不会丢）
+        const localOrders = this.getLocalOrders()
+        const merged = this.mergeOrders(apiOrders, localOrders)
+        console.log('解析完成订单列表（API+本地合并）', merged)
+        this.setData({ loading: false, orders: merged })
       },
-      fail: () => {
+      fail: (err) => {
+        console.log('========== 订单列表接口失败 ==========')
+        console.log('错误：', err)
         this.setData({ loading: false })
         this.useLocalOrders()
       }
@@ -154,6 +166,29 @@ Page({
       ? allOrders
       : allOrders.filter(item => item.status === this.data.activeTab)
     this.setData({ orders })
+  },
+
+  // 获取本地存储的订单（无论API是否成功）
+  getLocalOrders() {
+    return wx.getStorageSync('orders') || []
+  },
+
+  // 合并API订单和本地订单（去重，按ID）
+  mergeOrders(apiOrders, localOrders) {
+    const apiIds = new Set(apiOrders.map(o => String(o.id)))
+    const result = [...apiOrders]
+    for (const local of localOrders) {
+      if (!apiIds.has(String(local.id))) {
+        result.push(local)
+      }
+    }
+    // 按时间倒序
+    result.sort((a, b) => {
+      const ta = a.createTime || ''
+      const tb = b.createTime || ''
+      return tb.localeCompare(ta)
+    })
+    return result
   },
 
   goDetail(event) {
