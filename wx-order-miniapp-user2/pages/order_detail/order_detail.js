@@ -1,10 +1,12 @@
+
 const { getToken, requireLogin } = require('../../utils/auth')
 
 Page({
   data: {
     orderId: '',
     order: null,
-    loading: true
+    loading: true,
+    comment:false
   },
 
   onLoad(options) {
@@ -38,7 +40,10 @@ Page({
         // res.data.data = { details:[], order:{} }
         const rootData = res.data.data
         const parseResult = this.normalizeOrder(rootData)
-        this.setData({ order: parseResult, loading: false })
+        this.setData({ order: parseResult, loading: false }, () => {
+          // 订单加载完成，立刻查询评价接口
+          this.loadComment(orderId)
+        })
         console.log('解析后订单', parseResult)
       },
       fail: () => {
@@ -95,8 +100,7 @@ Page({
       totalPrice,
       address: item.address || '',
       tableInfo: item.tableInfo || '',
-      remark: item.remark || '',
-      comment: item.comment || null
+      remark: item.remark || ''
     }
   },
 
@@ -135,8 +139,11 @@ Page({
           this.loadCommentLocal(orderId)
           return
         }
-        const comment = this.normalizeComment(res.data)
-        this.setData({ comment })
+        console.log(res.data.data.length)
+        if(res.data.data.length!==0){
+          console.log(res.data.data.length)
+          this.setData({ comment:true })
+        }
       },
       fail: () => {
         this.loadCommentLocal(orderId)
@@ -144,18 +151,6 @@ Page({
     })
   },
 
-  normalizeComment(responseData) {
-    const raw = responseData && responseData.data ? responseData.data : responseData
-    if (!raw || typeof raw !== 'object') return null
-
-    const photoUrl = raw.photoUrl || raw.imageUrl || raw.imgUrl || raw.picUrl || raw.fileUrl || raw.url || raw.photo || ''
-    return {
-      id: String(raw.id || raw.commentId || ''),
-      content: raw.content || raw.text || raw.comment || raw.description || '',
-      photoUrl,
-      createTime: raw.createTime || raw.createdTime || raw.time || ''
-    }
-  },
 
   loadCommentLocal(orderId) {
     const feedbacks = wx.getStorageSync('feedbacks') || []
@@ -172,7 +167,7 @@ Page({
 
   goCommentDetail() {
     if (!this.data.order) return
-    wx.navigateTo({ url: `/pages/comment-detail/comment-detail?orderId=${this.data.order.id}` })
+    wx.navigateTo({ url: `/pages/comment_detail/comment_detail?orderId=${this.data.order.id}` })
   },
   goComment() {
     if (!this.data.order) return

@@ -42,8 +42,11 @@
   "libVersion": "3.4.10",
   "appid": "wx7489ea17d5eb4321",
   "projectname": "wechat-ordering-miniapp",
-  "miniprogramRoot": "./",
+  "miniprogramRoot": "",
   "condition": {},
   "simulatorPluginLibVersion": {},
-  "editorSetting": {}
+  "editorSetting": {
+    "tabIndent": "insertSpaces",
+    "tabSize": 2
+  }
 }

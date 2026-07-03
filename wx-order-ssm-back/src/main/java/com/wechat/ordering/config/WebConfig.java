@@ -27,14 +27,19 @@ public class WebConfig implements WebMvcConfigurer {
     private static final String IMAGES_PATH =
         System.getProperty("user.dir") + "/../wx-order-frontend-user1/public/images";
 
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 将 /images/** 映射到前端 public/images 目录，partner可通过IP访问图片
+        // ========== 原有代码 完全不动 ==========
         String absolutePath = new File(IMAGES_PATH).getAbsolutePath();
         registry.addResourceHandler("/images/**")
                 .addResourceLocations("file:" + absolutePath + "/");
-    }
 
+        // ========== 新增：上传图片/upload 映射（核心修复） ==========
+        // 访问路径前缀 /upload/** 对应磁盘 D:/upload/
+        registry.addResourceHandler("/upload/**")
+                .addResourceLocations("file:D:/upload/");
+    }
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -50,11 +55,11 @@ public class WebConfig implements WebMvcConfigurer {
         // 管理端认证拦截器
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/auth/login");
+                .excludePathPatterns("/admin/auth/login","/upload/**");
         // 小程序端认证拦截器
         registry.addInterceptor(wxAuthInterceptor)
                 .addPathPatterns("/wx/**")
-                .excludePathPatterns("/wx/user/login");
+                .excludePathPatterns("/wx/user/login","/upload/**");
     }
 
     @Bean

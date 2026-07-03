@@ -58,9 +58,12 @@ Page({
 
         // 打印日志方便调试，可后续删除
         console.log('接口原始返回res.data', res.data)
-        const orders = this.normalizeOrders(res.data)
+        let orders = this.normalizeOrders(res.data)
         console.log('解析完成订单列表', orders)
-        this.setData({ loading: false, orders: orders })
+        this.setData({ loading: false, orders: orders }, () => {
+          // 批量查询每个已完成订单的评价状态
+          this.batchCheckComment(orders)
+        })
       },
       fail: () => {
         this.setData({ loading: false })
@@ -94,6 +97,50 @@ Page({
     }
 
     return list.map(item => this.normalizeOrder(item))
+  },
+
+  // 批量查询已完成订单是否存在评价
+  batchCheckComment(orderList) {
+    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+    if (!baseUrl) return
+    const token = getToken()
+
+    // 只筛选状态=2（已完成）的订单，其他状态无需查评价
+    const completeOrders = orderList.filter(o => o.orderStatus === 2)
+    if (completeOrders.length === 0) return
+
+    // 循环请求每个订单评价接口
+    completeOrders.forEach(order => {
+      wx.request({
+        url: `${baseUrl}/wx/comments/order/${order.id}`,
+        method: 'GET',
+        header: {
+          Authorization: token ? `Bearer ${token}` : ''
+        },
+        success: commentRes => {
+          if (commentRes.statusCode === 200 && commentRes.data?.data!="") {
+            // 更新对应订单hasComment标记
+            const updateOrders = this.data.orders.map(item => {
+              if (item.id === order.id) {
+                return { ...item, hasComment: true }
+              }
+              return item
+            })
+            this.setData({ orders: updateOrders })
+          }
+          else{
+            const updateOrders = this.data.orders.map(item => {
+              if (item.id === order.id) {
+                return { ...item, hasComment: false }
+              }
+              return item
+            })
+            this.setData({ orders: updateOrders })
+          }
+        }
+        // fail/无数据自动保持hasComment=false，无需处理
+      })
+    })
   },
 
   // 修复：数字orderStatus转对应字符串状态，匹配你最新状态规则
@@ -134,6 +181,7 @@ Page({
       orderNo: item.orderNo || '',
       address: item.address || '',
       remark: item.remark || '',
+      hasComment: false
     }
   },
 
@@ -272,6 +320,12 @@ Page({
     wx.navigateTo({ url: `/pages/order_comment/order_comment?orderId=${event.currentTarget.dataset.id}` })
   },
 
+  lookComment(event) {
+    const orderId = event.currentTarget.dataset.id
+    wx.navigateTo({ 
+      url: `/pages/comment_detail/comment_detail?orderId=${orderId}` 
+    })
+  },
   deleteOrder(event) {
     removeOrder(event.currentTarget.dataset.id)
     this.refreshOrders()

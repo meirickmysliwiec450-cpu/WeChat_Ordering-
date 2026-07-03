@@ -46,25 +46,10 @@
       </view>
     </view>
 
-    <!-- <view class="card comment-card" wx:if="{{order.comment}}">
-      <text class="label">反馈内容</text>
-      <text class="comment-content">{{order.comment.content}}</text>
-    </view>
-
-    <button wx:if="{{order.status === 'completed'}}" class="btn-primary comment-btn" bindtap="goComment">照片反馈</button> -->
-
-    <view class="card comment-card" wx:if="{{comment && comment.content}}">
-      <view class="between">
-        <text class="label">反馈内容</text>
-        <text class="muted">{{comment.createTime}}</text>
-      </view>
-      <text class="comment-content">{{comment.content}}</text>
-      <image wx:if="{{comment.photoUrl}}" src="{{comment.photoUrl}}" mode="aspectFill" class="comment-photo" binderror="onPhotoError"></image>
-    </view>
 
     <!-- 已完成订单的操作按钮 -->
     <block wx:if="{{order.status === 'completed'}}">
-      <button wx:if="{{comment && comment.content}}" class="btn-outline comment-btn" bindtap="goCommentDetail">查看反馈</button>
+      <button wx:if="{{comment}}" class="btn-outline comment-btn" bindtap="goCommentDetail">查看反馈</button>
       <button wx:else class="btn-primary comment-btn" bindtap="goComment">照片反馈</button>
     </block>
   </block>

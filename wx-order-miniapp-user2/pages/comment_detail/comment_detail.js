@@ -4,7 +4,8 @@ Page({
   data: {
     orderId: '',
     comment: null,
-    loading: true
+    loading: true,
+    scoreList: [1, 2, 3, 4, 5],
   },
 
   onLoad(options) {
@@ -53,13 +54,14 @@ Page({
     const raw = responseData && responseData.data ? responseData.data : responseData
     if (!raw || typeof raw !== 'object') return null
 
-    const photoUrl = raw.photoUrl || raw.imageUrl || raw.imgUrl || raw.picUrl || raw.fileUrl || raw.url || raw.photo || ''
+    console.log(raw[0].content)
     return {
-      id: String(raw.id || raw.commentId || ''),
-      orderId: String(raw.orderId || ''),
-      content: raw.content || raw.text || raw.comment || raw.description || '',
-      photoUrl,
-      createTime: raw.createTime || raw.createdTime || raw.time || ''
+      id: String(raw[0].id || ''),
+      orderId: String(raw[0].orderId || ''),
+      content: raw[0].content || '',
+      photo:raw[0].photo,
+      createTime: raw[0].createTime || '',
+      score:raw[0].score
     }
   },
 
