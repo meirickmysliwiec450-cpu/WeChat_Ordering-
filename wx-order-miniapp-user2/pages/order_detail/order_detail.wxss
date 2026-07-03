@@ -1,0 +1,83 @@
+.header-card {
+  margin-bottom: 24rpx;
+}
+
+.title {
+  font-size: 36rpx;
+  font-weight: 800;
+}
+
+.status {
+  color: #c01818;
+  font-weight: 800;
+}
+
+.time {
+  display: block;
+  margin-top: 10rpx;
+}
+
+.tag-line {
+  margin-top: 18rpx;
+}
+
+.dish-line {
+  min-height: 92rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dish-line:last-child {
+  border-bottom: 0;
+}
+
+.dish-name {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  margin-bottom: 8rpx;
+}
+
+.summary {
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.total-price {
+  color: #c01818;
+  font-size: 38rpx;
+  font-weight: 800;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 24rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #f0f0f0;
+  font-size: 27rpx;
+}
+
+.info-row:last-child {
+  border-bottom: 0;
+}
+
+.label {
+  color: #777777;
+  flex-shrink: 0;
+}
+
+.feedback-card {
+  margin-top: 24rpx;
+}
+
+.feedback-content {
+  display: block;
+  margin-top: 14rpx;
+  line-height: 1.6;
+}
+
+.feedback-btn {
+  width: 100%;
+  margin-top: 28rpx;
+}

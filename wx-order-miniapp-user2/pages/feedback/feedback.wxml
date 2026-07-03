@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="card intro">
+    <text class="intro-title">订单菜品反馈</text>
+    <text class="intro-desc">仅针对已完成订单提交反馈，可上传照片并填写描述，便于管理员核对菜品问题。</text>
+  </view>
+
+  <view class="card order-card" wx:if="{{order}}">
+    <view class="between">
+      <text class="order-title">订单号 {{order.id}}</text>
+      <text class="tag">{{order.diningTypeText || '堂食'}}</text>
+    </view>
+    <view class="dish-line" wx:for="{{order.items}}" wx:key="id">
+      <text>{{item.name}} × {{item.count}}</text>
+      <text>￥{{item.price * item.count}}</text>
+    </view>
+    <view class="between total-row">
+      <text class="muted">订单金额</text>
+      <text class="price">￥{{order.totalPrice}}</text>
+    </view>
+  </view>
+
+  <view class="card form">
+    <view class="field">
+      <text class="label">反馈照片</text>
+      <view class="photo-box" bindtap="choosePhoto">
+        <image wx:if="{{photo}}" src="{{photo}}" mode="aspectFill" class="photo"></image>
+        <text wx:else class="photo-placeholder">点击上传照片</text>
+      </view>
+    </view>
+
+    <view class="field">
+      <text class="label">问题描述</text>
+      <textarea class="textarea" value="{{content}}" placeholder="请描述菜品、包装、配送或其他问题" bindinput="onContent" />
+    </view>
+
+    <button class="btn-primary submit-btn" bindtap="submitFeedback">提交反馈</button>
+  </view>
+
+  <view class="section-title" wx:if="{{feedbacks.length}}">历史反馈</view>
+  <view class="card feedback-item" wx:for="{{feedbacks}}" wx:key="id">
+    <view class="between">
+      <text class="type">订单 {{item.orderId}}</text>
+      <text class="muted">{{item.time}}</text>
+    </view>
+    <image wx:if="{{item.photo}}" src="{{item.photo}}" mode="aspectFill" class="history-photo"></image>
+    <text class="content">{{item.content}}</text>
+  </view>
+</view>

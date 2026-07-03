@@ -1,0 +1,38 @@
+.search-row {
+  display: flex;
+  gap: 16rpx;
+}
+
+.search-input {
+  flex: 1;
+  height: 84rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  padding: 0 28rpx;
+  box-sizing: border-box;
+}
+
+.search-button {
+  width: 150rpx;
+  height: 84rpx;
+  line-height: 84rpx;
+  border-radius: 999rpx;
+  margin: 0;
+  background: #c01818;
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+.hot-keywords {
+  margin-top: 24rpx;
+}
+
+.keyword {
+  display: inline-block;
+  margin: 0 14rpx 14rpx 0;
+  padding: 12rpx 24rpx;
+  background: #ffffff;
+  color: #c01818;
+  border-radius: 999rpx;
+  font-size: 24rpx;
+}

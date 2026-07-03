@@ -1,0 +1,46 @@
+<view class="page checkout-page">
+  <view class="card mode-card">
+    <view class="between">
+      <view>
+        <text class="title">订单结算</text>
+        <text class="muted">用餐方式：{{diningTypeText}}</text>
+      </view>
+      <button class="switch-btn" bindtap="backHome">修改</button>
+    </view>
+  </view>
+
+  <view class="card info-card">
+    <view class="field" wx:if="{{diningType === 'takeout'}}">
+      <text class="label">外送地址</text>
+      <input class="input" value="{{address}}" placeholder="请选择或填写配送地址" bindinput="onAddress" />
+      <button class="btn-outline address-btn" bindtap="chooseAddress">选择微信地址</button>
+    </view>
+
+    <view class="field" wx:else>
+      <text class="label">堂食备注</text>
+      <input class="input" value="{{tableInfo}}" placeholder="可填写桌号、取餐窗口或人数" bindinput="onTableInfo" />
+    </view>
+
+    <view class="field">
+      <text class="label">订单备注</text>
+      <textarea class="textarea" value="{{remark}}" placeholder="如少辣、不要葱、打包等" bindinput="onRemark" />
+    </view>
+  </view>
+
+  <view class="section-title">商品明细</view>
+  <view class="card">
+    <view class="dish-line between" wx:for="{{cart}}" wx:key="id">
+      <view>
+        <text class="dish-name">{{item.name}}</text>
+        <text class="muted">￥{{item.price}} × {{item.count}}</text>
+      </view>
+      <text class="price">￥{{item.price * item.count}}</text>
+    </view>
+    <view class="summary between">
+      <text>共 {{summary.totalCount}} 件</text>
+      <text class="total-price">￥{{summary.totalPrice}}</text>
+    </view>
+  </view>
+
+  <button class="btn-primary submit-btn" bindtap="submitOrder">结算</button>
+</view>

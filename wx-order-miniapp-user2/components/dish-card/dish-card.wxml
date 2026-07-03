@@ -1,0 +1,20 @@
+<view class="dish card" bindtap="onDetail">
+  <view class="dish-img" style="background: {{dish.imageUrl ? 'none' : dish.imageColor}};">
+    <image wx:if="{{dish.imageUrl}}" class="dish-real-img" src="{{dish.imageUrl}}" mode="aspectFill" binderror="onImgError"></image>
+    <text wx:else>{{dish.label}}</text>
+  </view>
+  <view class="dish-info">
+    <view class="between">
+      <text class="dish-name">{{dish.name}}</text>
+      <text class="tag" wx:if="{{dish.label}}">{{dish.label}}</text>
+    </view>
+    <text class="dish-desc">{{dish.desc}}</text>
+    <view class="between dish-bottom">
+      <view>
+        <text class="price">￥{{dish.price}}</text>
+        <text class="muted" wx:if="{{dish.sales}}"> 已售{{dish.sales}}</text>
+      </view>
+      <button class="add-btn" catchtap="onAdd">加入</button>
+    </view>
+  </view>
+</view>

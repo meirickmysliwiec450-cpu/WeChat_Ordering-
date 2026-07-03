@@ -1,0 +1,67 @@
+<view class="menu-page">
+  <view class="top-search" bindtap="goSearch">
+    <text>搜索菜品</text>
+    <text class="mode-text">{{diningTypeText}}</text>
+  </view>
+
+  <swiper class="banner-swiper" indicator-dots autoplay circular interval="3000" duration="500">
+    <swiper-item class="banner-item" wx:for="{{banners}}" wx:key="id">
+      <image class="banner-image" src="{{item.imageUrl}}" mode="aspectFill" data-index="{{index}}" binderror="onBannerError"></image>
+      <view class="banner-text">
+        <text class="banner-title">{{item.title}}</text>
+        <text class="banner-desc">{{item.description}}</text>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <view class="menu-body">
+    <scroll-view class="category-list" scroll-y>
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="category {{activeCategory === item.id ? 'active' : ''}}"
+        data-id="{{item.id}}"
+        bindtap="selectCategory"
+      >
+        {{item.name}}
+      </view>
+    </scroll-view>
+
+    <scroll-view class="dish-list" scroll-y>
+      <dish-card wx:for="{{currentDishes}}" wx:key="id" dish="{{item}}" bind:add="addCart" bind:detail="viewDishDetail" />
+      <view class="bottom-tip">已显示全部菜品</view>
+    </scroll-view>
+  </view>
+
+  <view class="cart-panel" wx:if="{{cart.length}}">
+    <view class="cart-header between">
+      <view>
+        <text class="cart-title">购物栏</text>
+        <text class="muted">共 {{summary.totalCount}} 件</text>
+      </view>
+      <text class="clear" bindtap="clearCart">清空</text>
+    </view>
+    <scroll-view class="cart-items" scroll-y>
+      <view class="cart-item" wx:for="{{cart}}" wx:key="id">
+        <text class="cart-name">{{item.name}}</text>
+        <text class="price">￥{{item.price * item.count}}</text>
+        <view class="stepper">
+          <button data-id="{{item.id}}" data-count="{{item.count - 1}}" bindtap="changeCount">-</button>
+          <text>{{item.count}}</text>
+          <button data-id="{{item.id}}" data-count="{{item.count + 1}}" bindtap="changeCount">+</button>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="cart-footer between">
+      <view>
+        <text class="total">合计 ￥{{summary.totalPrice}}</text>
+        <text class="muted">{{diningTypeText}}</text>
+      </view>
+      <button class="checkout-btn" bindtap="goCheckout">去结算</button>
+    </view>
+  </view>
+
+  <view class="empty-cart-bar" wx:else>
+    <text>购物栏为空，请先添加菜品</text>
+  </view>
+</view>

@@ -1,0 +1,49 @@
+<view class="page">
+  <view class="hero">
+    <view>
+      <text class="hello">欢迎使用</text>
+      <text class="shop">{{shopName}}</text>
+      <text class="hero-sub">先选择堂食或外送，再进入菜单下单结算</text>
+    </view>
+  </view>
+
+  <view class="mode-card card">
+    <view class="between">
+      <view>
+        <text class="mode-title">请选择用餐方式</text>
+        <text class="mode-desc">当前：{{diningTypeText}}</text>
+      </view>
+      <text class="tag">必选</text>
+    </view>
+    <view class="mode-options">
+      <view class="mode-option {{diningType === 'dineIn' ? 'active' : ''}}" data-type="dineIn" bindtap="selectDiningType">
+        <text class="mode-name">堂食</text>
+        <text class="mode-sub">到店取餐或桌边用餐</text>
+      </view>
+      <view class="mode-option {{diningType === 'takeout' ? 'active' : ''}}" data-type="takeout" bindtap="selectDiningType">
+        <text class="mode-name">外送</text>
+        <text class="mode-sub">填写地址后配送</text>
+      </view>
+    </view>
+    <button class="btn-primary start-btn" bindtap="startOrder">开始点餐</button>
+  </view>
+
+  <view class="search card" bindtap="goSearch">
+    <text class="search-placeholder">搜索菜品名称、分类或口味</text>
+    <text class="search-btn">搜索</text>
+  </view>
+
+  <view class="feature-grid">
+    <view class="feature card" bindtap="goMenu">
+      <text class="feature-title">查看菜品</text>
+      <text class="feature-desc">分类浏览菜单</text>
+    </view>
+    <view class="feature card" bindtap="goOrders">
+      <text class="feature-title">订单操作</text>
+      <text class="feature-desc">确认收餐和评价反馈</text>
+    </view>
+  </view>
+
+  <view class="section-title">热销菜品</view>
+  <dish-card wx:for="{{hotDishes}}" wx:key="id" dish="{{item}}" bind:add="addCart" />
+</view>

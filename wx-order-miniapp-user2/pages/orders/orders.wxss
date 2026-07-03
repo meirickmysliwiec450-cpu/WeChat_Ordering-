@@ -1,0 +1,95 @@
+.tabs {
+  white-space: nowrap;
+  margin-bottom: 20rpx;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 66rpx;
+  padding: 0 28rpx;
+  border-radius: 999rpx;
+  background: #ffffff;
+  color: #666666;
+  font-size: 26rpx;
+  margin-right: 14rpx;
+}
+
+.tab.active {
+  background: #c01818;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.order {
+  margin-bottom: 20rpx;
+}
+
+.order-id {
+  font-size: 25rpx;
+  color: #555555;
+}
+
+.status {
+  color: #c01818;
+  font-weight: 700;
+}
+
+.time {
+  display: block;
+  margin-top: 8rpx;
+}
+
+.order-items {
+  margin-top: 18rpx;
+  padding: 16rpx 0;
+  border-top: 1rpx solid #f0f0f0;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.dish-line {
+  font-size: 26rpx;
+  line-height: 52rpx;
+}
+
+.remark {
+  margin-top: 14rpx;
+  color: #666666;
+  font-size: 25rpx;
+}
+
+.total {
+  margin-top: 18rpx;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14rpx;
+  margin-top: 20rpx;
+}
+
+.small-btn {
+  height: 60rpx;
+  line-height: 60rpx;
+  font-size: 24rpx;
+  padding: 0 22rpx;
+}
+
+
+.meta-row {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-top: 10rpx;
+}
+
+.feedback-done {
+  margin-top: 14rpx;
+  padding: 14rpx;
+  border-radius: 14rpx;
+  background: #f8f8f8;
+  color: #666666;
+  font-size: 24rpx;
+}

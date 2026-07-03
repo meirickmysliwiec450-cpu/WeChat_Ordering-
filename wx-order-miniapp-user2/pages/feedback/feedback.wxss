@@ -1,0 +1,102 @@
+.intro {
+  margin-bottom: 24rpx;
+}
+
+.intro-title,
+.intro-desc {
+  display: block;
+}
+
+.intro-title {
+  font-size: 34rpx;
+  font-weight: 800;
+}
+
+.intro-desc {
+  margin-top: 14rpx;
+  color: #777777;
+  font-size: 25rpx;
+  line-height: 1.6;
+}
+
+.order-card {
+  margin-bottom: 24rpx;
+}
+
+.order-title {
+  font-weight: 800;
+  font-size: 28rpx;
+}
+
+.dish-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 62rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+  font-size: 26rpx;
+}
+
+.total-row {
+  margin-top: 18rpx;
+}
+
+.field {
+  margin-bottom: 22rpx;
+}
+
+.label {
+  display: block;
+  font-size: 26rpx;
+  color: #555555;
+  margin-bottom: 14rpx;
+}
+
+.photo-box {
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 22rpx;
+  background: #f8f8f8;
+  border: 2rpx dashed #dddddd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.photo {
+  width: 220rpx;
+  height: 220rpx;
+}
+
+.photo-placeholder {
+  color: #999999;
+  font-size: 25rpx;
+}
+
+.submit-btn {
+  width: 100%;
+}
+
+.feedback-item {
+  margin-bottom: 18rpx;
+}
+
+.type {
+  color: #c01818;
+  font-weight: 700;
+}
+
+.history-photo {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 18rpx;
+  margin-top: 16rpx;
+}
+
+.content {
+  display: block;
+  margin: 16rpx 0;
+  font-size: 27rpx;
+  line-height: 1.5;
+}

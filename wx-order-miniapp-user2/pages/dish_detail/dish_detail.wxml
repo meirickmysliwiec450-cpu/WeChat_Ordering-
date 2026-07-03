@@ -1,0 +1,46 @@
+<view class="detail-page" wx:if="{{!loading && dish}}">
+  <!-- 菜品图片 -->
+  <view class="detail-img-wrap" style="background: {{dish.imageUrl ? '#f5f5f5' : dish.imageColor}};">
+    <image wx:if="{{dish.imageUrl}}" class="detail-img" src="{{dish.imageUrl}}" mode="aspectFill" binderror="onImgError"></image>
+    <text wx:else class="detail-img-text">{{dish.label || dish.name}}</text>
+  </view>
+
+  <!-- 菜品信息 -->
+  <view class="detail-info">
+    <view class="detail-header">
+      <text class="detail-name">{{dish.name}}</text>
+      <text class="detail-tag" wx:if="{{dish.label}}">{{dish.label}}</text>
+    </view>
+
+    <text class="detail-desc">{{dish.desc}}</text>
+
+    <view class="detail-meta">
+      <text class="muted" wx:if="{{dish.sales}}">月售 {{dish.sales}} 份</text>
+      <text class="muted" wx:if="{{dish.stock}}">库存 {{dish.stock}}</text>
+    </view>
+
+    <view class="detail-price-row">
+      <text class="detail-price">￥{{dish.price}}</text>
+      <text class="detail-price-unit">/份</text>
+    </view>
+  </view>
+
+  <!-- 底部操作栏 -->
+  <view class="detail-footer">
+    <view class="detail-footer-price">
+      <text class="detail-price">￥{{dish.price}}</text>
+    </view>
+    <button class="add-cart-btn" bindtap="addCart">加入购物栏</button>
+  </view>
+</view>
+
+<!-- 加载中 -->
+<view class="detail-loading" wx:if="{{loading}}">
+  <text>加载中...</text>
+</view>
+
+<!-- 无数据 -->
+<view class="detail-empty" wx:if="{{!loading && !dish}}">
+  <text>菜品信息不存在</text>
+  <button class="btn-primary" style="margin-top: 30rpx;" bindtap="goBack">返回</button>
+</view>

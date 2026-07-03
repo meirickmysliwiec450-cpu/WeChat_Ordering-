@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "微信点餐系统",
+  "usingComponents": {
+    "dish-card": "/components/dish-card/dish-card"
+  }
+}
