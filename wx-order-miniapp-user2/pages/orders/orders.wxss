@@ -85,7 +85,7 @@
   margin-top: 10rpx;
 }
 
-.feedback-done {
+.comment-done {
   margin-top: 14rpx;
   padding: 14rpx;
   border-radius: 14rpx;

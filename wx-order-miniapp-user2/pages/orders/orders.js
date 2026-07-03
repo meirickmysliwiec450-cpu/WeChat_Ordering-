@@ -32,17 +32,15 @@ Page({
   },
 
   refreshOrders() {
-    console.log('========== 开始刷新订单列表 ==========')
-    
     const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    const fullUrl = `${baseUrl}/wx/orders`
-    console.log('请求地址：', fullUrl)
-    console.log('当前Token：', getToken())
-    console.log('当前Tab：', this.data.activeTab)
-    
+    if (!baseUrl) {
+      this.useLocalOrders()
+      return
+    }
+
     this.setData({ loading: true })
     wx.request({
-      url: fullUrl,
+      url: `${baseUrl}/wx/orders`,
       method: 'GET',
       // 核心修复：把字符串tab转数字传给后端
       data: this.data.activeTab === 'all' 
@@ -52,13 +50,8 @@ Page({
         Authorization: getToken() ? `Bearer ${getToken()}` : ''
       },
       success: res => {
-        console.log('========== 订单列表接口响应 ==========')
-        console.log('状态码：', res.statusCode)
-        console.log('完整响应：', res)
-        
         const ok = res.statusCode >= 200 && res.statusCode < 300
         if (!ok) {
-          console.log('响应不是2xx，使用本地订单')
           this.useLocalOrders()
           return
         }
@@ -66,15 +59,12 @@ Page({
         // 打印日志方便调试，可后续删除
         console.log('接口原始返回res.data', res.data)
         const apiOrders = this.normalizeOrders(res.data)
-        // 合并本地订单（后端没保存的订单也不会丢）
         const localOrders = this.getLocalOrders()
-        const merged = this.mergeOrders(apiOrders, localOrders)
-        console.log('解析完成订单列表（API+本地合并）', merged)
-        this.setData({ loading: false, orders: merged })
+        const orders = this.mergeOrders(apiOrders, localOrders)
+        console.log('解析完成订单列表(API+本地)', orders)
+        this.setData({ loading: false, orders: orders })
       },
-      fail: (err) => {
-        console.log('========== 订单列表接口失败 ==========')
-        console.log('错误：', err)
+      fail: () => {
         this.setData({ loading: false })
         this.useLocalOrders()
       }
@@ -134,28 +124,27 @@ Page({
     }
 
     return {
-      id: String(item.id || item.orderId || item.orderNo || ''),
-      createTime: item.createTime || item.createdTime || item.orderTime || '',
-      status,
-      statusText: item.statusText || this.getStatusText(status),
+      id: String(item.id || ''),
+      createTime: item.createTime || '',
+      orderStatus:item.orderStatus,
+      statusText: this.getStatusText(item.orderStatus),
       diningType: item.diningType || item.type || '',
       diningTypeText: item.diningTypeText || (item.diningType === 'takeout' ? '外送' : '堂食'),
       items,
       totalCount: Number(item.totalCount) || items.reduce((sum, dish) => sum + dish.count, 0),
-      totalPrice: Number(item.totalPrice || item.amount || item.totalAmount) || items.reduce((sum, dish) => sum + dish.price * dish.count, 0),
+      totalPrice: item.payAmount,
+      orderNo: item.orderNo || '',
       address: item.address || '',
-      tableInfo: item.tableInfo || '',
       remark: item.remark || '',
-      feedback: item.feedback || null
     }
   },
 
   getStatusText(status) {
     const statusMap = {
-      pending: '待支付',
-      paid: '已支付',
-      completed: '已完成',
-      cancelled: '已取消'
+      3: '待支付',
+      1: '已支付',
+      2: '已完成',
+      0: '已取消'
     }
     return statusMap[status] || status || '未知状态'
   },
@@ -168,12 +157,10 @@ Page({
     this.setData({ orders })
   },
 
-  // 获取本地存储的订单（无论API是否成功）
   getLocalOrders() {
     return wx.getStorageSync('orders') || []
   },
 
-  // 合并API订单和本地订单（去重，按ID）
   mergeOrders(apiOrders, localOrders) {
     const apiIds = new Set(apiOrders.map(o => String(o.id)))
     const result = [...apiOrders]
@@ -182,12 +169,7 @@ Page({
         result.push(local)
       }
     }
-    // 按时间倒序
-    result.sort((a, b) => {
-      const ta = a.createTime || ''
-      const tb = b.createTime || ''
-      return tb.localeCompare(ta)
-    })
+    result.sort((a, b) => (b.createTime || '').localeCompare(a.createTime || ''))
     return result
   },
 
@@ -304,8 +286,8 @@ Page({
     })
   },
 
-  goFeedback(event) {
-    wx.navigateTo({ url: `/pages/feedback/feedback?orderId=${event.currentTarget.dataset.id}` })
+  goComment(event) {
+    wx.navigateTo({ url: `/pages/order_comment/order_comment?orderId=${event.currentTarget.dataset.id}` })
   },
 
   deleteOrder(event) {
