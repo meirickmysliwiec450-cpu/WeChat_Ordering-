@@ -1,0 +1,15 @@
+<view class="page">
+  <view class="search-row">
+    <input class="search-input" value="{{keyword}}" placeholder="请输入菜品名称或口味" confirm-type="search" bindinput="onInput" bindconfirm="doSearch" />
+    <button class="search-button" bindtap="doSearch">搜索</button>
+  </view>
+
+  <view class="hot-keywords" wx:if="{{!keyword}}">
+    <text class="muted">热门搜索：</text>
+    <text wx:for="{{keywords}}" wx:key="*this" class="keyword" data-keyword="{{item}}" bindtap="selectKeyword">{{item}}</text>
+  </view>
+
+  <view class="section-title">搜索结果</view>
+  <dish-card wx:for="{{results}}" wx:key="id" dish="{{item}}" bind:add="addCart" />
+  <view wx:if="{{results.length === 0}}" class="empty">暂无匹配菜品，请换个关键词试试</view>
+</view>

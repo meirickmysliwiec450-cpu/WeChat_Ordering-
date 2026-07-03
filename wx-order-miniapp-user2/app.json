@@ -1,0 +1,47 @@
+{
+  "pages": [
+    "pages/home/home",
+    "pages/login/login",
+    "pages/menu/menu",
+    "pages/dish_detail/dish_detail",
+    "pages/search/search",
+    "pages/cart/cart",
+    "pages/checkout/checkout",
+    "pages/orders/orders",
+    "pages/order_detail/order_detail",
+    "pages/profile/profile",
+    "pages/feedback/feedback"
+  ],
+  "window": {
+    "navigationBarTitleText": "微信点餐系统",
+    "navigationBarBackgroundColor": "#c01818",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f7f4ef"
+  },
+  "tabBar": {
+    "color": "#777777",
+    "selectedColor": "#c01818",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/home/home",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/menu/menu",
+        "text": "菜单"
+      },
+      {
+        "pagePath": "pages/orders/orders",
+        "text": "订单"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

@@ -1,0 +1,59 @@
+.profile-head {
+  display: flex;
+  align-items: center;
+  gap: 22rpx;
+}
+
+.avatar {
+  width: 110rpx;
+  height: 110rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #c01818, #ee8a36);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 42rpx;
+  font-weight: 800;
+}
+
+.nickname {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 800;
+  margin-bottom: 12rpx;
+}
+
+.field {
+  margin-bottom: 22rpx;
+}
+
+.label {
+  display: block;
+  font-size: 26rpx;
+  color: #555555;
+  margin-bottom: 14rpx;
+}
+
+.save-btn {
+  width: 100%;
+  margin-top: 10rpx;
+}
+
+.menu-item {
+  min-height: 96rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1rpx solid #f0f0f0;
+  font-size: 28rpx;
+}
+
+.menu-item:last-child {
+  border-bottom: 0;
+}
+
+
+.logout {
+  color: #c01818;
+}
