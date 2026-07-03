@@ -5,22 +5,44 @@
         <text class="title">订单结算</text>
         <text class="muted">用餐方式：{{diningTypeText}}</text>
       </view>
-      <button class="switch-btn" bindtap="backHome">修改</button>
+      <button class="switch-btn" bindtap="toggleMode">{{showModePicker ? '收起' : '修改'}}</button>
+    </view>
+    <!-- 用餐方式切换 -->
+    <view class="mode-picker" wx:if="{{showModePicker}}">
+      <view class="mode-opt {{diningType === 'dineIn' ? 'mode-on' : ''}}" bindtap="switchMode" data-type="dineIn">🍴 堂食</view>
+      <view class="mode-opt {{diningType === 'pickup' ? 'mode-on' : ''}}" bindtap="switchMode" data-type="pickup">🥡 自取</view>
+      <view class="mode-opt {{diningType === 'takeout' ? 'mode-on' : ''}}" bindtap="switchMode" data-type="takeout">🛵 外送</view>
     </view>
   </view>
 
   <view class="card info-card">
     <view class="field" wx:if="{{diningType === 'takeout'}}">
-      <text class="label">外送地址</text>
-      <input class="input" value="{{address}}" placeholder="请选择或填写配送地址" bindinput="onAddress" />
-      <button class="btn-outline address-btn" bindtap="chooseAddress">选择微信地址</button>
+      <text class="label">选择收货地址</text>
+      <view class="addr-list" wx:if="{{addressList.length > 0}}">
+        <view class="addr-opt {{selectedAddr && selectedAddr.id === item.id ? 'addr-opt-on' : ''}}" wx:for="{{addressList}}" wx:key="id" bindtap="selectAddr" data-id="{{item.id}}">
+          <view class="addr-opt-top">
+            <text class="addr-opt-name">{{item.receiver}}</text>
+            <text class="addr-opt-phone">{{item.phone}}</text>
+            <text class="addr-opt-tag" wx:if="{{item.isDefault}}">默认</text>
+          </view>
+          <text class="addr-opt-detail">{{item.addressDetail}}</text>
+        </view>
+      </view>
+      <view class="addr-empty" wx:else>
+        <text class="muted">暂无收货地址</text>
+      </view>
+      <button class="btn-outline address-btn" bindtap="goAddAddress">＋ 管理收货地址</button>
     </view>
 
     <view class="field" wx:else>
-      <text class="label">堂食备注</text>
-      <input class="input" value="{{tableInfo}}" placeholder="可填写桌号、取餐窗口或人数" bindinput="onTableInfo" />
+      <text class="label">{{diningType === 'pickup' ? '自取备注' : '堂食备注'}}</text>
+      <input class="input" value="{{tableInfo}}" placeholder="可填写取餐时间、桌号等" bindinput="onTableInfo" />
     </view>
 
+    <view class="field">
+      <text class="label">联系电话 <text class="required">*</text></text>
+      <input class="input" type="number" value="{{phone}}" placeholder="请输入联系电话" bindinput="onPhone" maxlength="11" />
+    </view>
     <view class="field">
       <text class="label">订单备注</text>
       <textarea class="textarea" value="{{remark}}" placeholder="如少辣、不要葱、打包等" bindinput="onRemark" />

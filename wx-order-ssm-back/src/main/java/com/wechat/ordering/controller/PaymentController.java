@@ -19,8 +19,9 @@ public class PaymentController {
     public Result<Map<String, Object>> list(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) Long orderId) {
-        return Result.success(paymentService.list(page, pageSize, orderId));
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return Result.success(paymentService.list(page, pageSize, startDate, endDate));
     }
 
     @GetMapping("/{id}")

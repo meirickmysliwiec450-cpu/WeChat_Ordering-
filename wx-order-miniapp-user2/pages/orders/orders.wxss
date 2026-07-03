@@ -93,3 +93,10 @@
   color: #666666;
   font-size: 24rpx;
 }
+
+.review-action-btn {
+  background: linear-gradient(135deg, #ff9800, #f57c00) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+}

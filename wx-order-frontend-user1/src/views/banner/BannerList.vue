@@ -53,27 +53,25 @@
         <el-form-item label="预览" v-if="form.imageUrl">
           <el-image :src="form.imageUrl" style="width:200px;height:120px;border-radius:6px" fit="cover" />
         </el-form-item>
-        <!-- 图片选择器（按子文件夹分组） -->
-        <el-form-item label="选择图片">
+        <!-- 从菜品库选择图片 -->
+        <el-form-item label="选择菜品图片">
           <div class="image-picker">
-            <div v-if="imageList.length === 0" style="color:#909399;font-size:13px;margin-bottom:8px">
-              暂无图片，请将图片放入 public/images 文件夹的子目录中
+            <div v-if="dishList.length === 0" style="color:#909399;font-size:13px;margin-bottom:8px">
+              暂无菜品，请先在菜品管理中上架菜品
             </div>
-            <template v-for="(group, folder) in imageGroups" :key="folder">
-              <div class="folder-label">{{ folder }}</div>
-              <div class="image-grid">
-                <div
-                  v-for="img in group"
-                  :key="img.name"
-                  class="image-item"
-                  :class="{ selected: form.imageUrl === img.url }"
-                  @click="form.imageUrl = img.url"
-                >
-                  <el-image :src="img.url" style="width:100%;height:80px" fit="cover" />
-                  <span class="image-name">{{ img.shortName }}</span>
-                </div>
+            <div class="image-grid">
+              <div
+                v-for="dish in dishList"
+                :key="dish.id"
+                class="image-item"
+                :class="{ selected: form.imageUrl === dish.image }"
+                @click="selectDish(dish)"
+              >
+                <el-image :src="dish.image" style="width:100%;height:80px" fit="cover" />
+                <span class="image-name">{{ dish.dishName }}</span>
+                <span class="image-price">¥{{ dish.price }}</span>
               </div>
-            </template>
+            </div>
           </div>
         </el-form-item>
         <el-form-item label="跳转链接"><el-input v-model="form.linkUrl" placeholder="可选" /></el-form-item>
@@ -89,7 +87,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { getBanners, addBanner, updateBanner, updateBannerStatus, deleteBanner } from '@/api/banner'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
@@ -100,20 +98,7 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const editId = ref(null)
 const form = ref({ title: '', imageUrl: '', linkUrl: '', sort: 0, remark: '' })
-const imageList = ref([])
-
-// 按子文件夹分组
-const imageGroups = computed(() => {
-  const groups = {}
-  for (const img of imageList.value) {
-    const slashIdx = img.name.lastIndexOf('/')
-    const folder = slashIdx > 0 ? img.name.substring(0, slashIdx) : '默认'
-    const shortName = slashIdx > 0 ? img.name.substring(slashIdx + 1) : img.name
-    if (!groups[folder]) groups[folder] = []
-    groups[folder].push({ ...img, shortName })
-  }
-  return groups
-})
+const dishList = ref([])
 
 async function fetchData() {
   loading.value = true
@@ -123,27 +108,33 @@ async function fetchData() {
   } finally { loading.value = false }
 }
 
-async function fetchImages() {
+async function fetchDishes() {
   try {
     const token = localStorage.getItem('adminToken')
-    const res = await axios.get('http://localhost:8080/api/admin/upload/images', {
+    const res = await axios.get('http://localhost:8080/api/admin/dishes', {
+      params: { page: 1, pageSize: 100 },
       headers: { Authorization: `Bearer ${token}` }
     })
-    imageList.value = res.data.data || []
+    dishList.value = (res.data.data?.list || []).filter(d => d.status === 1)
   } catch (e) { /* 忽略 */ }
+}
+
+function selectDish(dish) {
+  form.value.imageUrl = dish.image
+  form.value.title = dish.dishName || form.value.title
 }
 
 function handleAdd() {
   isEdit.value = false; editId.value = null
   form.value = { title: '', imageUrl: '', linkUrl: '', sort: 0, remark: '' }
-  fetchImages()
+  fetchDishes()
   dialogVisible.value = true
 }
 
 function handleEdit(row) {
   isEdit.value = true; editId.value = row.id
   form.value = { title: row.title, imageUrl: row.imageUrl, linkUrl: row.linkUrl, sort: row.sort, remark: row.remark }
-  fetchImages()
+  fetchDishes()
   dialogVisible.value = true
 }
 
@@ -212,5 +203,11 @@ onMounted(fetchData)
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+.image-price {
+  display: block;
+  font-size: 11px;
+  color: #e04030;
+  font-weight: bold;
 }
 </style>

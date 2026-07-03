@@ -25,8 +25,21 @@ function requireLogin() {
 }
 
 function buildUrl(path) {
-  const baseUrl = (getApp().globalData.baseUrl || 'http://localhost:8080/api').replace(/\/$/, '')
+  const baseUrl = (getApp().globalData.baseUrl || 'http://172.20.10.10:8080/api').replace(/\/$/, '')
   return `${baseUrl}${path}`
+}
+
+/** 小程序图片显示：加 ?base64=true 绕过微信HTTP限制 */
+function imageUrl(url) {
+  if (!url) return ''
+  // 相对路径 → 完整URL
+  if (!url.startsWith('http')) {
+    const base = (getApp().globalData.baseUrl || 'http://172.20.10.10:8080/api').replace(/\/$/, '')
+    url = base + (url.startsWith('/') ? '' : '/') + url
+  }
+  // 已是 base64 不重复加
+  if (url.includes('?base64')) return url
+  return url + '?base64=true'
 }
 
 function normalizeLoginResult(responseData) {
@@ -144,5 +157,6 @@ module.exports = {
   requireLogin,
   loginByCode,
   logout,
-  buildUrl
+  buildUrl,
+  imageUrl
 }

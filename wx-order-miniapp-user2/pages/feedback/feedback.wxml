@@ -1,23 +1,44 @@
 <view class="page">
   <view class="card intro">
-    <text class="intro-title">功能反馈</text>
-    <text class="intro-desc">针对系统功能提交反馈，可上传照片并填写描述，便于管理员收集并整改</text>
+    <text class="intro-title">💬 意见反馈</text>
+    <text class="intro-desc">对菜品、服务或系统有什么建议？告诉我们，我们会尽快回复</text>
   </view>
+
+  <!-- 提交反馈 -->
   <view class="card form">
-
     <view class="field">
-      <text class="label">问题描述</text>
-      <textarea class="textarea" value="{{content}}" placeholder="请描述问题" bindinput="onContent" />
+      <text class="label">反馈内容</text>
+      <textarea class="textarea" value="{{content}}" placeholder="请详细描述你的问题或建议…" bindinput="onContent" maxlength="500" />
     </view>
-
-    <button class="btn-primary submit-btn" bindtap="submitFeedback">提交反馈</button>
+    <button class="btn-primary submit-btn" bindtap="submitFeedback" disabled="{{!content}}">提交反馈</button>
   </view>
 
-  <view class="section-title" wx:if="{{feedbacks.length}}">历史反馈</view>
-  <view class="card feedback-item" wx:for="{{feedbacks}}" wx:key="id">
-    <view class="between">
-      <text class="muted">{{item.createTime}}</text>
+  <!-- 历史反馈列表 -->
+  <view class="section-title" wx:if="{{feedbacks.length}}">📋 我的反馈记录</view>
+  <view class="feedback-item" wx:for="{{feedbacks}}" wx:key="id">
+    <!-- 用户反馈 -->
+    <view class="fb-row fb-user">
+      <view class="fb-bubble fb-bubble-user">
+        <text class="fb-content">{{item.content}}</text>
+        <text class="fb-time">{{item.createTime}}</text>
+      </view>
     </view>
-    <text class="content">{{item.content}}</text>
+    <!-- 商家回复 -->
+    <view class="fb-row fb-merchant" wx:if="{{item.replyContent}}">
+      <view class="fb-bubble fb-bubble-reply">
+        <text class="fb-label">🏪 商家回复：</text>
+        <text class="fb-content">{{item.replyContent}}</text>
+      </view>
+    </view>
+    <view class="fb-row fb-merchant" wx:else>
+      <view class="fb-bubble fb-bubble-waiting">
+        <text class="fb-content">⏳ 商家尚未回复，请耐心等待…</text>
+      </view>
+    </view>
+    <view class="fb-divider"></view>
+  </view>
+
+  <view class="empty" wx:if="{{feedbacks.length === 0 && !content}}">
+    <text class="empty-text">暂无反馈记录</text>
   </view>
 </view>

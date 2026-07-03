@@ -17,9 +17,8 @@ import java.io.OutputStream;
 @Component
 public class ImageFilter implements Filter {
 
-    /** 图片根目录 —— 指向商家前端的 public/images 目录 */
-    // 使用绝对路径，确保能找到文件！
-    private static final File IMG_ROOT = new File("E:\\综合课程设计Ⅲ\\WechatOrdering\\wx-order-frontend-user1\\public\\images").getAbsoluteFile();
+    /** 图片根目录 */
+    private static final File IMG_ROOT = new File("E:/wechat_images");
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
@@ -80,6 +79,20 @@ public class ImageFilter implements Filter {
 
         System.out.println("文件存在，开始输出图片");
         System.out.println("====================================");
+
+        // 检测是否请求 base64
+        boolean base64 = "true".equals(request.getParameter("base64"));
+        if (base64) {
+            try (FileInputStream fis = new FileInputStream(file)) {
+                byte[] data = new byte[(int) file.length()];
+                fis.read(data);
+                String b64 = java.util.Base64.getEncoder().encodeToString(data);
+                String mime = response.getContentType();
+                response.setContentType("text/plain");
+                response.getWriter().write("data:" + mime + ";base64," + b64);
+            }
+            return;
+        }
 
         // 输出文件内容
         try (FileInputStream fis = new FileInputStream(file);

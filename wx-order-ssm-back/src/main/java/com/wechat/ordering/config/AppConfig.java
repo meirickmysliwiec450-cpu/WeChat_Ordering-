@@ -24,18 +24,23 @@ public class AppConfig {
         INSTANCE = this;
     }
 
-    /**
-     * 将相对路径（如 /images/面食/饺子.png）解析为完整URL
-     * 如果已经是完整URL则直接返回
-     */
+    /** 将相对路径解析为完整URL */
     public static String resolveImage(String imagePath) {
         if (imagePath == null || imagePath.isEmpty()) return imagePath;
         if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) return imagePath;
-        // 去掉可能重复的 /api 前缀
+        if (imagePath.startsWith("data:")) return imagePath;
         String base = INSTANCE.baseUrl;
         if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
         if (!imagePath.startsWith("/")) imagePath = "/" + imagePath;
         return base + imagePath;
+    }
+
+    /** 小程序专用：返回 base64 图片 API URL，绕过微信 HTTP 限制 */
+    public static String resolveImageBase64(String imagePath) {
+        String url = resolveImage(imagePath);
+        if (url == null || url.isEmpty()) return url;
+        if (url.startsWith("data:")) return url;
+        return url + "?base64=true";
     }
 
     /** 获取 baseUrl（非静态调用） */

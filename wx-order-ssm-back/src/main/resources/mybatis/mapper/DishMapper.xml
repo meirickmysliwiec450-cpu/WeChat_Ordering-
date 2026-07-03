@@ -74,6 +74,7 @@
             image = #{image},
             price = #{price},
             description = #{description},
+            sales = #{sales},
             stock = #{stock},
             status = #{status},
             discount = #{discount},

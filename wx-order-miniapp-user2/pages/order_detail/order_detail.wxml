@@ -64,8 +64,7 @@
 
     <!-- 已完成订单的操作按钮 -->
     <block wx:if="{{order.status === 'completed'}}">
-      <button wx:if="{{comment && comment.content}}" class="btn-outline comment-btn" bindtap="goCommentDetail">查看反馈</button>
-      <button wx:else class="btn-primary comment-btn" bindtap="goComment">照片反馈</button>
+      <button class="btn-primary review-btn" bindtap="goReview">{{hasReviewed ? '✏️ 追加评价' : '⭐ 订单评价'}}</button>
     </block>
   </block>
 </view>

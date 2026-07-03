@@ -8,7 +8,7 @@
           <image class="swiper-img" src="{{item.image}}" mode="aspectFill" />
           <view class="swiper-info">
             <text class="swiper-name">{{item.dishName}}</text>
-            <text class="swiper-price">¥{{item.price}}</text>
+            <text class="swiper-price" wx:if="{{item.price}}">¥{{item.price}}</text>
           </view>
         </view>
       </swiper-item>
@@ -27,6 +27,11 @@
         <text class="opt-name">堂食</text>
         <text class="opt-desc">到店用餐</text>
       </view>
+      <view class="dining-opt {{diningType === 'pickup' ? 'active' : ''}}" data-type="pickup" bindtap="selectDiningType">
+        <text class="opt-icon">🥡</text>
+        <text class="opt-name">自取</text>
+        <text class="opt-desc">到店取餐</text>
+      </view>
       <view class="dining-opt {{diningType === 'takeout' ? 'active' : ''}}" data-type="takeout" bindtap="selectDiningType">
         <text class="opt-icon">🛵</text>
         <text class="opt-name">外送</text>
@@ -36,23 +41,7 @@
     <button class="start-btn" bindtap="startOrder" disabled="{{!diningType}}">{{diningType ? '开始点餐' : '请先选择用餐方式'}}</button>
   </view>
 
-  <!-- 快捷入口 -->
-  <view class="quick-row">
-    <view class="quick-item" bindtap="goMenu">
-      <text class="quick-icon">📋</text>
-      <text class="quick-text">浏览菜单</text>
-    </view>
-    <view class="quick-item" bindtap="goSearch">
-      <text class="quick-icon">🔍</text>
-      <text class="quick-text">搜索菜品</text>
-    </view>
-    <view class="quick-item" bindtap="goOrders">
-      <text class="quick-icon">📦</text>
-      <text class="quick-text">我的订单</text>
-    </view>
-  </view>
-
-  <!-- 热销 -->
+  <!-- 热销（按真实销量排序） -->
   <view class="section-title">🔥 热销菜品</view>
   <dish-card wx:for="{{hotDishes}}" wx:key="id" dish="{{item}}" bind:add="addCart" />
 

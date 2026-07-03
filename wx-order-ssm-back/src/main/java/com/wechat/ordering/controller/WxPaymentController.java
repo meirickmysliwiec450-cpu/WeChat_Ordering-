@@ -1,11 +1,14 @@
 package com.wechat.ordering.controller;
 
+import com.wechat.ordering.entity.Payment;
+import com.wechat.ordering.mapper.PaymentMapper;
 import com.wechat.ordering.service.WxPaymentService;
 import com.wechat.ordering.util.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -14,6 +17,9 @@ public class WxPaymentController {
 
     @Autowired
     private WxPaymentService wxPaymentService;
+
+    @Autowired
+    private PaymentMapper paymentMapper;
 
     /** 发起支付（模拟） */
     @PostMapping
@@ -28,5 +34,12 @@ public class WxPaymentController {
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }
+    }
+
+    /** 查看我的支付记录 */
+    @GetMapping
+    public Result<List<Payment>> list(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return Result.success(paymentMapper.selectByUserId(userId));
     }
 }

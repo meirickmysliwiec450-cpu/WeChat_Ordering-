@@ -1,0 +1,29 @@
+<view class="page">
+  <view class="card">
+    <text class="title">{{isUpdate ? '✏️ 追加评价' : '⭐ 订单评价'}}</text>
+    <text class="sub">订单号：{{orderNo}}</text>
+  </view>
+
+  <!-- 星级评分 -->
+  <view class="card score-card">
+    <text class="label">总体评分</text>
+    <view class="stars">
+      <text class="star {{index < score ? 'star-on' : ''}}" wx:for="{{5}}" wx:key="*this" bindtap="setScore" data-score="{{index + 1}}">
+        {{index < score ? '⭐' : '☆'}}
+      </text>
+    </view>
+    <text class="score-hint">{{scoreHint}}</text>
+  </view>
+
+  <!-- 评价内容 -->
+  <view class="card">
+    <text class="label">评价内容</text>
+    <textarea class="textarea" value="{{content}}" placeholder="说说你对这次用餐的感受吧…" bindinput="onContent" maxlength="300" />
+    <text class="counter">{{content.length}}/300</text>
+  </view>
+
+  <!-- 提交 -->
+  <button class="btn-primary submit-btn" bindtap="submitReview" disabled="{{score === 0 || submitting}}">
+    {{submitting ? '提交中…' : (isUpdate ? '更新评价' : '提交评价')}}
+  </button>
+</view>

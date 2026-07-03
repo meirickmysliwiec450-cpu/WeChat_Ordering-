@@ -89,7 +89,7 @@
 .rp-title { font-size: 28rpx; font-weight: 700; display: block; margin-bottom: 12rpx; }
 .rp-body { font-size: 26rpx; color: #555; line-height: 1.85; white-space: pre-wrap; }
 
-.msg-list { flex: 1; padding: 8rpx 14rpx; }
+.msg-list { flex: 1; height: 0; padding: 8rpx 14rpx; }
 .msg-empty { display: flex; flex-direction: column; align-items: center; padding-top: 60rpx; }
 .empty-icon { font-size: 72rpx; margin-bottom: 12rpx; }
 .empty-title { font-size: 28rpx; color: #666; }

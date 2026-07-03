@@ -3,6 +3,7 @@ const { getToken, requireLogin } = require('../../utils/auth')
 Page({
   data: {
     orderId: '',
+    hasReviewed: false,
     order: null,
     loading: true
   },
@@ -10,6 +11,7 @@ Page({
   onLoad(options) {
     this.setData({ orderId: options.id || '' })
     this.loadOrderDetail(options.id || '')
+    this.checkReviewStatus(options.id || '')
   },
 
   loadOrderDetail(orderId) {
@@ -168,6 +170,25 @@ Page({
         createTime: fb.time
       } : null
     })
+  },
+
+  checkReviewStatus(orderId) {
+    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+    wx.request({
+      url: `${baseUrl}/wx/comments/order/${orderId}`,
+      method: 'GET',
+      header: { Authorization: `Bearer ${getToken()}` },
+      success: res => {
+        if (res.data?.code === 200 && res.data.data?.length > 0) {
+          this.setData({ hasReviewed: true })
+        }
+      }
+    })
+  },
+
+  goReview() {
+    if (!this.data.order) return
+    wx.navigateTo({ url: `/pages/order_review/order_review?orderId=${this.data.order.id}&orderNo=${this.data.order.orderNo || ''}` })
   },
 
   goComment() {

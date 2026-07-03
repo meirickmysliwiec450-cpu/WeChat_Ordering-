@@ -28,6 +28,11 @@
         FROM t_order_comment WHERE `order-id` = #{orderId}
     </select>
 
+    <select id="selectByUserId" resultMap="OrderCommentResultMap">
+        SELECT id, `order-id`, `user-id`, score, content, photo, `create-time`
+        FROM t_order_comment WHERE `user-id` = #{userId} ORDER BY `create-time` DESC
+    </select>
+
     <insert id="insert" parameterType="OrderComment" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_order_comment (`order-id`, `user-id`, score, content, photo, `create-time`)
         VALUES (#{orderId}, #{userId}, #{score}, #{content}, #{photo}, #{createTime})

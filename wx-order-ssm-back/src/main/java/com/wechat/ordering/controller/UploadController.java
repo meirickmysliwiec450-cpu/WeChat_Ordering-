@@ -14,8 +14,7 @@ import java.util.*;
 @RequestMapping("/admin/upload")
 public class UploadController {
 
-    private static final String IMAGES_DIR =
-        System.getProperty("user.dir") + "/../wx-order-frontend-user1/public/images";
+    private static final String IMAGES_DIR = "E:/wechat_images";
 
     /** 获取所有可用图片列表（递归扫描子目录） */
     @GetMapping("/images")

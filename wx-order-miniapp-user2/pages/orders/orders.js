@@ -1,12 +1,8 @@
-const { updateOrder, removeOrder } = require('../../utils/store')
 const { getToken, requireLogin } = require('../../utils/auth')
 
-const tabToApiNum = {
-  pending: 3,
-  paid: 1,
-  completed: 2,
-  cancelled: 0
-}
+const TAB_MAP = { pending: 3, paid: 1, completed: 2, cancelled: 0 }
+const STATUS_MAP = { 3: 'pending', 1: 'paid', 2: 'completed', 0: 'cancelled' }
+const STATUS_TEXT = { 3: '待支付', 1: '已支付', 2: '已完成', 0: '已取消' }
 
 Page({
   data: {
@@ -27,271 +23,144 @@ Page({
     this.refreshOrders()
   },
 
-  changeTab(event) {
-    this.setData({ activeTab: event.currentTarget.dataset.key }, () => this.refreshOrders())
+  changeTab(e) {
+    const tab = e.currentTarget.dataset.key
+    this.setData({ activeTab: tab }, () => this.refreshOrders())
   },
 
   refreshOrders() {
     const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    if (!baseUrl) {
-      this.useLocalOrders()
-      return
-    }
+    if (!baseUrl) { this.useLocal(); return }
 
     this.setData({ loading: true })
+    const apiStatus = TAB_MAP[this.data.activeTab]
+    const reqData = apiStatus != null ? { status: apiStatus } : {}
+
     wx.request({
       url: `${baseUrl}/wx/orders`,
       method: 'GET',
-      // 核心修复：把字符串tab转数字传给后端
-      data: this.data.activeTab === 'all' 
-        ? {} 
-        : { status: tabToApiNum[this.data.activeTab] },
-      header: {
-        Authorization: getToken() ? `Bearer ${getToken()}` : ''
-      },
+      data: reqData,
+      header: { Authorization: `Bearer ${getToken()}` },
       success: res => {
-        const ok = res.statusCode >= 200 && res.statusCode < 300
-        if (!ok) {
-          this.useLocalOrders()
-          return
+        if (res.statusCode >= 200 && res.statusCode < 300 && res.data?.code === 200) {
+          const apiList = (res.data.data?.list || []).map(o => this.formatOrder(o))
+          const localList = this.getLocalOrders()
+          let merged = this.mergeLists(apiList, localList)
+          // 前端二次过滤确保准确
+          if (this.data.activeTab !== 'all') {
+            merged = merged.filter(o => o.status === this.data.activeTab)
+          }
+          this.setData({ orders: merged, loading: false })
+        } else {
+          this.useLocal()
         }
-
-        // 打印日志方便调试，可后续删除
-        console.log('接口原始返回res.data', res.data)
-        const apiOrders = this.normalizeOrders(res.data)
-        const localOrders = this.getLocalOrders()
-        const orders = this.mergeOrders(apiOrders, localOrders)
-        console.log('解析完成订单列表(API+本地)', orders)
-        this.setData({ loading: false, orders: orders })
       },
-      fail: () => {
-        this.setData({ loading: false })
-        this.useLocalOrders()
-      }
+      fail: () => this.useLocal()
     })
   },
 
-  // 修复：正确提取接口里的 list 数组
-  normalizeOrders(responseData) {
-    let list = []
-    // 当前接口标准结构：外层data.data.list
-    if (responseData?.data?.list && Array.isArray(responseData.data.list)) {
-      list = responseData.data.list
-    }
-    // 兼容纯数组返回
-    else if (Array.isArray(responseData)) {
-      list = responseData
-    }
-    // 兼容 records 分页格式
-    else if (responseData?.data?.records && Array.isArray(responseData.data.records)) {
-      list = responseData.data.records
-    }
-    // 兼容 rows 格式
-    else if (responseData?.rows && Array.isArray(responseData.rows)) {
-      list = responseData.rows
-    }
-    // 兼容 data 直接是数组的旧接口
-    else if (Array.isArray(responseData?.data)) {
-      list = responseData.data
-    }
-
-    return list.map(item => this.normalizeOrder(item))
-  },
-
-  // 修复：数字orderStatus转对应字符串状态，匹配你最新状态规则
-  normalizeOrder(item) {
-    const rawItems = item.items || item.orderItems || item.dishes || []
-    const items = Array.isArray(rawItems) ? rawItems.map(dish => ({
-      id: String(dish.id || dish.dishId || ''),
-      name: dish.name || dish.dishName || '菜品',
-      price: Number(dish.price) || 0,
-      count: Number(dish.count || dish.quantity || dish.number) || 1
-    })) : []
-
-    // 按你要求的数字状态映射
-    let statusRaw = item.status || item.orderStatus
-    let status
-    if (typeof statusRaw === 'number') {
-      const numStatusMap = {
-        3: 'pending',    // 3 = 待支付
-        1: 'paid',        // 1 = 已支付
-        2: 'completed',   // 2 = 已完成
-        0: 'cancelled'    // 0 = 已取消
-      }
-      status = numStatusMap[statusRaw] || 'pending'
-    } else {
-      status = statusRaw || 'pending'
-    }
-
+  formatOrder(o) {
+    const items = (o.items || []).map(d => ({
+      id: String(d.id || d.dishId || ''),
+      name: d.name || d.dishName || '菜品',
+      price: Number(d.price) || 0,
+      count: Number(d.count || d.quantity || 1)
+    }))
+    const os = o.orderStatus
     return {
-      id: String(item.id || ''),
-      createTime: item.createTime || '',
-      orderStatus:item.orderStatus,
-      statusText: this.getStatusText(item.orderStatus),
-      diningType: item.diningType || item.type || '',
-      diningTypeText: item.diningTypeText || (item.diningType === 'takeout' ? '外送' : '堂食'),
+      id: String(o.id || ''),
+      orderNo: o.orderNo || '',
+      createTime: o.createTime || '',
+      orderStatus: os,
+      status: STATUS_MAP[os] || 'pending',
+      statusText: STATUS_TEXT[os] || '未知',
+      diningType: o.receiver ? 'takeout' : 'dineIn',
+      diningTypeText: o.receiver ? '外送' : '堂食',
       items,
-      totalCount: Number(item.totalCount) || items.reduce((sum, dish) => sum + dish.count, 0),
-      totalPrice: item.payAmount,
-      orderNo: item.orderNo || '',
-      address: item.address || '',
-      remark: item.remark || '',
+      totalCount: items.reduce((s, d) => s + d.count, 0),
+      totalPrice: o.payAmount || o.totalAmount || 0,
+      address: o.receiver || '',
+      remark: o.remark || ''
     }
-  },
-
-  getStatusText(status) {
-    const statusMap = {
-      3: '待支付',
-      1: '已支付',
-      2: '已完成',
-      0: '已取消'
-    }
-    return statusMap[status] || status || '未知状态'
-  },
-
-  useLocalOrders() {
-    const allOrders = wx.getStorageSync('orders') || []
-    const orders = this.data.activeTab === 'all'
-      ? allOrders
-      : allOrders.filter(item => item.status === this.data.activeTab)
-    this.setData({ orders })
   },
 
   getLocalOrders() {
-    return wx.getStorageSync('orders') || []
+    return (wx.getStorageSync('orders') || []).map(o => ({
+      ...o,
+      orderStatus: o.orderStatus != null ? o.orderStatus : (TAB_MAP[o.status] || 3),
+      status: o.status || 'pending',
+      statusText: o.statusText || '未知',
+      totalCount: o.totalCount || (o.items || []).reduce((s, d) => s + (d.count || 1), 0)
+    }))
   },
 
-  mergeOrders(apiOrders, localOrders) {
-    const apiIds = new Set(apiOrders.map(o => String(o.id)))
-    const result = [...apiOrders]
-    for (const local of localOrders) {
-      if (!apiIds.has(String(local.id))) {
-        result.push(local)
-      }
+  mergeLists(api, local) {
+    const ids = new Set(api.map(o => o.id))
+    const result = [...api]
+    for (const o of local) {
+      if (!ids.has(o.id)) result.push(o)
     }
     result.sort((a, b) => (b.createTime || '').localeCompare(a.createTime || ''))
     return result
   },
 
-  goDetail(event) {
-    wx.navigateTo({ url: `/pages/order_detail/order_detail?id=${event.currentTarget.dataset.id}` })
+  useLocal() {
+    const all = this.getLocalOrders()
+    const filtered = this.data.activeTab === 'all'
+      ? all
+      : all.filter(o => o.status === this.data.activeTab)
+    this.setData({ orders: filtered, loading: false })
   },
 
-  payOrder(event) {
-    const id = event.currentTarget.dataset.id
-    updateOrder(id, { status: 'paid', statusText: '已支付' })
-    wx.showToast({ title: '支付成功', icon: 'success' })
-    this.refreshOrders()
+  goReview(e) {
+    const { id, orderno } = e.currentTarget.dataset
+    wx.navigateTo({ url: `/pages/order_review/order_review?orderId=${id}&orderNo=${orderno || ''}` })
   },
 
-  cancelOrder(event) {
-    const id = event.currentTarget.dataset.id
+  goDetail(e) {
+    wx.navigateTo({ url: `/pages/order_detail/order_detail?id=${e.currentTarget.dataset.id}` })
+  },
+
+  payOrder(e) {
+    wx.showToast({ title: '请稍后再试', icon: 'none' })
+  },
+
+  cancelOrder(e) {
+    const id = e.currentTarget.dataset.id
     wx.showModal({
       title: '取消订单',
       content: '确定要取消该订单吗？',
       success: res => {
         if (!res.confirm) return
-        this.cancelOrderByApi(id)
+        const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+        wx.request({
+          url: `${baseUrl}/wx/orders/${id}/cancel`,
+          method: 'PUT',
+          header: { Authorization: `Bearer ${getToken()}` },
+          success: () => { wx.showToast({ title: '已取消', icon: 'success' }); this.refreshOrders() },
+          fail: () => wx.showToast({ title: '取消失败', icon: 'none' })
+        })
       }
     })
   },
 
-  cancelOrderByApi(id) {
-    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    wx.showLoading({ title: '取消中' })
-
-    if (!baseUrl) {
-      updateOrder(id, { status: 'cancelled', statusText: '已取消' })
-      wx.hideLoading()
-      this.refreshOrders()
-      return
-    }
-
-    wx.request({
-      url: `${baseUrl}/wx/orders/${id}/cancel`,
-      method: 'PUT',
-      header: {
-        Authorization: getToken() ? `Bearer ${getToken()}` : ''
-      },
-      success: res => {
-        wx.hideLoading()
-        const ok = res.statusCode >= 200 && res.statusCode < 300
-        if (!ok) {
-          wx.showToast({ title: '取消失败', icon: 'none' })
-          return
-        }
-        wx.showToast({ title: '已取消订单', icon: 'success' })
-        this.refreshOrders()
-      },
-      fail: () => {
-        wx.hideLoading()
-        wx.showToast({ title: '取消失败，请稍后重试', icon: 'none' })
-      }
-    })
-  },
-
-  finishOrder(event) {
-    const id = event.currentTarget.dataset.id
+  finishOrder(e) {
+    const id = e.currentTarget.dataset.id
     wx.showModal({
       title: '确认收餐',
       content: '确认已收到餐品？',
       success: res => {
         if (!res.confirm) return
-        this.finishOrderByApi(id)
+        const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+        wx.request({
+          url: `${baseUrl}/wx/orders/${id}`,
+          method: 'PUT',
+          header: { 'content-type': 'application/json', Authorization: `Bearer ${getToken()}` },
+          data: { orderStatus: 2 },
+          success: () => { wx.showToast({ title: '已确认', icon: 'success' }); this.refreshOrders() },
+          fail: () => wx.showToast({ title: '操作失败', icon: 'none' })
+        })
       }
     })
-  },
-
-  // 新增：调用PUT /wx/orders/{id} 修改订单状态为2
-  finishOrderByApi(id) {
-    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
-    wx.showLoading({ title: '处理中' })
-
-    // 无后端环境只更新本地缓存
-    if (!baseUrl) {
-      updateOrder(id, { status: 'completed', statusText: '已完成' })
-      wx.hideLoading()
-      wx.showToast({ title: '已确认收餐', icon: 'success' })
-      this.refreshOrders()
-      return
-    }
-
-    wx.request({
-      url: `${baseUrl}/wx/orders/${id}`,
-      method: 'PUT',
-      header: {
-        Authorization: getToken() ? `Bearer ${getToken()}` : '',
-        'content-type': 'application/json'
-      },
-      // 仅传递orderStatus=2，后端接收后修改状态
-      data: {
-        orderStatus: 2
-      },
-      success: res => {
-        wx.hideLoading()
-        const ok = res.statusCode >= 200 && res.statusCode < 300
-        if (!ok) {
-          wx.showToast({ title: '操作失败', icon: 'none' })
-          return
-        }
-        // 同步更新本地缓存
-        updateOrder(id, { status: 'completed', statusText: '已完成' })
-        wx.showToast({ title: '已确认收餐', icon: 'success' })
-        this.refreshOrders()
-      },
-      fail: () => {
-        wx.hideLoading()
-        wx.showToast({ title: '请求失败，请重试', icon: 'none' })
-      }
-    })
-  },
-
-  goComment(event) {
-    wx.navigateTo({ url: `/pages/order_comment/order_comment?orderId=${event.currentTarget.dataset.id}` })
-  },
-
-  deleteOrder(event) {
-    removeOrder(event.currentTarget.dataset.id)
-    this.refreshOrders()
   }
 })

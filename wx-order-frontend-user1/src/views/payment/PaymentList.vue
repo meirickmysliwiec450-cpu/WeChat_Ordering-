@@ -3,13 +3,14 @@
     <h3>支付记录</h3>
     <el-card>
       <div class="toolbar">
-        <el-input v-model="filterOrderId" placeholder="按订单号筛选" clearable @clear="fetchData" style="width:220px" />
+        <el-date-picker v-model="dateRange" type="daterange" range-separator="至"
+          start-placeholder="开始日期" end-placeholder="结束日期" format="YYYY-MM-DD" value-format="YYYY-MM-DD"
+          @change="fetchData" style="width:280px" />
         <el-button type="primary" @click="fetchData">查询</el-button>
       </div>
       <el-table :data="payments" stripe v-loading="loading">
-        <el-table-column prop="id" label="ID" width="70" />
-        <el-table-column prop="orderId" label="订单ID" width="80" />
         <el-table-column prop="payNo" label="支付流水号" min-width="200" show-overflow-tooltip />
+        <el-table-column prop="orderId" label="订单ID" width="90" />
         <el-table-column prop="payAmount" label="支付金额" width="120">
           <template #default="{ row }">¥{{ row.payAmount?.toFixed(2) }}</template>
         </el-table-column>
@@ -21,7 +22,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="payTime" label="支付时间" width="170" />
-        <el-table-column label="操作" width="100">
+        <el-table-column label="操作" width="80">
           <template #default="{ row }">
             <el-button type="primary" size="small" link @click="showDetail(row)">详情</el-button>
           </template>
@@ -34,15 +35,13 @@
       />
     </el-card>
 
-    <!-- 详情弹窗 -->
-    <el-dialog title="支付记录详情" v-model="detailVisible" width="500px">
+    <el-dialog title="支付详情" v-model="detailVisible" width="460px">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="ID">{{ detail.id }}</el-descriptions-item>
+        <el-descriptions-item label="流水号">{{ detail.payNo }}</el-descriptions-item>
         <el-descriptions-item label="订单ID">{{ detail.orderId }}</el-descriptions-item>
-        <el-descriptions-item label="支付流水号">{{ detail.payNo }}</el-descriptions-item>
-        <el-descriptions-item label="支付金额">¥{{ detail.payAmount?.toFixed(2) }}</el-descriptions-item>
-        <el-descriptions-item label="支付方式">{{ detail.payMethod }}</el-descriptions-item>
-        <el-descriptions-item label="支付时间">{{ detail.payTime }}</el-descriptions-item>
+        <el-descriptions-item label="金额">¥{{ detail.payAmount?.toFixed(2) }}</el-descriptions-item>
+        <el-descriptions-item label="方式">{{ detail.payMethod }}</el-descriptions-item>
+        <el-descriptions-item label="时间">{{ detail.payTime }}</el-descriptions-item>
       </el-descriptions>
     </el-dialog>
   </div>
@@ -57,18 +56,19 @@ const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
-const filterOrderId = ref('')
+const dateRange = ref([])
 const detailVisible = ref(false)
 const detail = ref({})
 
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getPayments({
-      page: page.value,
-      pageSize: pageSize.value,
-      orderId: filterOrderId.value || undefined
-    })
+    const params = { page: page.value, pageSize: pageSize.value }
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+    const res = await getPayments(params)
     payments.value = res.data.list
     total.value = res.data.total
   } finally { loading.value = false }

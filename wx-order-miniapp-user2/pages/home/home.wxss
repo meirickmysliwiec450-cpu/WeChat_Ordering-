@@ -20,20 +20,14 @@
 .dining-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20rpx; }
 .dining-title { font-size: 30rpx; font-weight: 700; }
 .dining-current { font-size: 24rpx; color: #c01818; background: #fff2ec; padding: 6rpx 16rpx; border-radius: 20rpx; }
-.dining-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16rpx; }
-.dining-opt { border: 2rpx solid #eee; border-radius: 16rpx; padding: 28rpx 20rpx; text-align: center; background: #fafafa; transition: all 0.2s; }
+.dining-options { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12rpx; }
+.dining-opt { border: 2rpx solid #eee; border-radius: 16rpx; padding: 22rpx 14rpx; text-align: center; background: #fafafa; transition: all 0.2s; }
 .dining-opt.active { border-color: #c01818; background: #fff2ec; }
-.opt-icon { font-size: 44rpx; display: block; }
-.opt-name { font-size: 28rpx; font-weight: 700; color: #333; display: block; margin-top: 8rpx; }
-.opt-desc { font-size: 22rpx; color: #999; display: block; margin-top: 4rpx; }
+.opt-icon { font-size: 40rpx; display: block; }
+.opt-name { font-size: 26rpx; font-weight: 700; color: #333; display: block; margin-top: 6rpx; }
+.opt-desc { font-size: 20rpx; color: #999; display: block; margin-top: 2rpx; }
 .start-btn { width: 100%; margin-top: 20rpx; height: 80rpx; line-height: 80rpx; font-size: 30rpx; font-weight: 700; color: #fff; background: linear-gradient(135deg, #c01818, #e04030); border-radius: 40rpx; border: none; }
 .start-btn[disabled] { background: #ddd; color: #999; }
-
-/* ========== 快捷入口 ========== */
-.quick-row { display: flex; margin: 0 20rpx; gap: 16rpx; }
-.quick-item { flex: 1; text-align: center; background: #fff; border-radius: 16rpx; padding: 28rpx 0; box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.03); }
-.quick-icon { font-size: 40rpx; display: block; }
-.quick-text { font-size: 24rpx; color: #666; display: block; margin-top: 8rpx; }
 
 /* ========== 热销 ========== */
 .section-title { font-size: 30rpx; font-weight: 700; padding: 30rpx 24rpx 10rpx; color: #333; }

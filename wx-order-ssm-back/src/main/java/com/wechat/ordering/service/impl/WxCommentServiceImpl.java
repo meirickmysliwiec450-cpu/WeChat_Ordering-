@@ -23,9 +23,16 @@ public class WxCommentServiceImpl implements WxCommentService {
         if (order == null || !order.getUserId().equals(userId)) throw new RuntimeException("订单不存在");
         if (order.getOrderStatus() != 2) throw new RuntimeException("只有已完成的订单才能评价");
 
-        // 检查是否已评价
+        // 检查是否已评价，已评价则更新
         List<OrderComment> existing = orderCommentMapper.selectByOrderId(orderId);
-        if (!existing.isEmpty()) throw new RuntimeException("该订单已评价过");
+        if (!existing.isEmpty()) {
+            OrderComment c = existing.get(0);
+            c.setScore(score);
+            c.setContent(content);
+            if (photo != null && !photo.isEmpty()) c.setPhoto(photo);
+            orderCommentMapper.update(c);
+            return;
+        }
 
         OrderComment comment = OrderComment.builder()
                 .orderId(orderId).userId(userId).score(score)
@@ -37,5 +44,10 @@ public class WxCommentServiceImpl implements WxCommentService {
     @Override
     public List<OrderComment> getByOrderId(Long orderId) {
         return orderCommentMapper.selectByOrderId(orderId);
+    }
+
+    @Override
+    public List<OrderComment> getByUserId(Long userId) {
+        return orderCommentMapper.selectByUserId(userId);
     }
 }

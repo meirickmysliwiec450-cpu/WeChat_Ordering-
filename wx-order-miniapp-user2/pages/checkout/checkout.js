@@ -1,4 +1,4 @@
-const { getCart, getCartSummary, clearCart, createOrder, getDiningType, getDiningTypeText } = require('../../utils/store')
+const { getCart, getCartSummary, clearCart, createOrder, getDiningType, getDiningTypeText, setDiningType } = require('../../utils/store')
 const { getToken, requireLogin } = require('../../utils/auth')
 
 Page({
@@ -9,8 +9,12 @@ Page({
     summary: { totalCount: 0, totalPrice: 0 },
     address: '',
     tableInfo: '',
+    phone: '',
     remark: '',
-    submitting: false
+    submitting: false,
+    addressList: [],
+    selectedAddr: null,
+    showModePicker: false
   },
 
   onShow() {
@@ -37,18 +41,43 @@ Page({
       diningTypeText: getDiningTypeText(diningType),
       cart,
       summary: getCartSummary(cart),
-      address: profile.address || this.data.address
+      address: profile.address || this.data.address,
+      phone: profile.phone || ''
     })
+    if (diningType === 'takeout') this.loadAddresses()
+  },
+
+  loadAddresses() {
+    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+    wx.request({
+      url: `${baseUrl}/wx/address`,
+      header: { Authorization: `Bearer ${getToken()}` },
+      success: res => {
+        if (res.data?.code === 200) {
+          const list = res.data.data || []
+          const def = list.find(a => a.isDefault) || list[0] || null
+          this.setData({ addressList: list, selectedAddr: def })
+        }
+      }
+    })
+  },
+
+  selectAddr(e) {
+    const id = e.currentTarget.dataset.id
+    const addr = this.data.addressList.find(a => a.id == id)
+    this.setData({ selectedAddr: addr })
+  },
+
+  goAddAddress() {
+    wx.navigateTo({ url: '/pages/address/address' })
   },
 
   onAddress(event) {
     this.setData({ address: event.detail.value })
   },
 
-  onTableInfo(event) {
-    this.setData({ tableInfo: event.detail.value })
-  },
-
+  onTableInfo(event) { this.setData({ tableInfo: event.detail.value }) },
+  onPhone(event) { this.setData({ phone: event.detail.value }) },
   onRemark(event) {
     this.setData({ remark: event.detail.value })
   },
@@ -63,6 +92,20 @@ Page({
         wx.showToast({ title: '可手动填写地址', icon: 'none' })
       }
     })
+  },
+
+  toggleMode() { this.setData({ showModePicker: !this.data.showModePicker }) },
+
+  switchMode(e) {
+    const type = e.currentTarget.dataset.type
+    setDiningType(type)
+    this.setData({
+      diningType: type,
+      diningTypeText: getDiningTypeText(type),
+      showModePicker: false,
+      selectedAddr: null
+    })
+    if (type === 'takeout') this.loadAddresses()
   },
 
   backHome() {
@@ -89,12 +132,9 @@ Page({
     }
   
     if (data.diningType === 'takeout') {
-      const selectAddress = wx.getStorageSync('selectAddress') || {}
-      // 兜底：没有地址默认赋值空，后端会拦截
-      payload.addressId = selectAddress.id ?? null
+      payload.addressId = this.data.selectedAddr ? this.data.selectedAddr.id : null
     } else {
-      // 堂食固定传0
-      payload.addressId = 0
+      payload.addressId = 0  // 堂食/自取不需要地址
     }
     return payload
   },
@@ -102,8 +142,12 @@ Page({
   submitOrder() {
     if (this.data.submitting) return
 
-    if (this.data.diningType === 'takeout' && !this.data.address.trim()) {
-      wx.showToast({ title: '请选择或填写外送地址', icon: 'none' })
+    if (this.data.diningType === 'takeout' && !this.data.selectedAddr) {
+      wx.showToast({ title: '请先选择收货地址', icon: 'none' })
+      return
+    }
+    if (!this.data.phone.trim() || this.data.phone.trim().length < 11) {
+      wx.showToast({ title: '请输入正确的11位手机号', icon: 'none' })
       return
     }
 

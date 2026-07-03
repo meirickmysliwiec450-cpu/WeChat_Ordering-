@@ -1,46 +1,57 @@
 <view class="page">
-  <view class="profile-head card">
-    <view class="avatar">{{profile.avatarText}}</view>
-    <view>
-      <text class="nickname">{{profile.nickname}}</text>
-      <text class="muted">完善个人信息后下单更快捷</text>
+  <!-- 头像区 -->
+  <view class="head-card" bindtap="goEditProfile">
+    <view class="avatar-circle">{{profile.avatarText}}</view>
+    <text class="head-name">{{profile.nickname || '微信用户'}}</text>
+    <text class="head-arrow">查看个人信息 ›</text>
+  </view>
+
+  <!-- 数据概览 -->
+  <view class="stats-row">
+    <view class="stat-item" bindtap="goOrders">
+      <text class="stat-num">{{orderCount}}</text>
+      <text class="stat-label">我的订单</text>
+    </view>
+    <view class="stat-divider"></view>
+    <view class="stat-item">
+      <text class="stat-num">{{points}}</text>
+      <text class="stat-label">积分 (¥1=1分)</text>
     </view>
   </view>
 
-  <view class="section-title">修改个人信息</view>
-  <view class="card form">
-    <view class="field">
-      <text class="label">昵称</text>
-      <input class="input" value="{{profile.nickname}}" placeholder="请输入昵称" data-key="nickname" bindinput="onInput" />
+  <!-- 功能菜单 -->
+  <view class="menu-card">
+    <view class="menu-row" bindtap="goAddress">
+      <text class="menu-icon">📍</text>
+      <text class="menu-text">收货地址</text>
+      <text class="menu-arrow">›</text>
     </view>
-    <view class="field">
-      <text class="label">手机号</text>
-      <input class="input" type="number" value="{{profile.phone}}" placeholder="请输入手机号" data-key="phone" bindinput="onInput" />
+    <view class="menu-row" bindtap="goPayments">
+      <text class="menu-icon">💰</text>
+      <text class="menu-text">支付记录</text>
+      <text class="menu-arrow">›</text>
     </view>
-    <view class="field">
-      <text class="label">默认取餐/配送信息</text>
-      <input class="input" value="{{profile.address}}" placeholder="如 3 号桌、宿舍楼、公司地址" data-key="address" bindinput="onInput" />
+    <view class="menu-row" bindtap="goOrders">
+      <text class="menu-icon">📦</text>
+      <text class="menu-text">我的订单</text>
+      <text class="menu-arrow">›</text>
     </view>
-    <button class="btn-primary save-btn" bindtap="saveProfile">保存信息</button>
+    <view class="menu-row" bindtap="goReviews">
+      <text class="menu-icon">⭐</text>
+      <text class="menu-text">我的评价</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row" bindtap="goFeedback">
+      <text class="menu-icon">💬</text>
+      <text class="menu-text">意见反馈</text>
+      <text class="menu-arrow">›</text>
+    </view>
+    <view class="menu-row">
+      <text class="menu-icon">📞</text>
+      <text class="menu-text">客服电话</text>
+      <text class="menu-val">{{servicePhone}}</text>
+    </view>
   </view>
 
-  <view class="section-title">常用功能</view>
-  <view class="card menu-list">
-    <view class="menu-item" bindtap="goOrders">
-      <text>我的订单</text>
-      <text class="muted">查看订单状态</text>
-    </view>
-    <view class="menu-item" bindtap="goFeedback">
-      <text>菜品反馈</text>
-      <text class="muted">向管理员反馈商品信息</text>
-    </view>
-    <view class="menu-item">
-      <text>客服电话</text>
-      <text class="muted">{{servicePhone}}</text>
-    </view>
-    <view class="menu-item logout" bindtap="logout">
-      <text>退出登录</text>
-      <text class="muted">清除当前登录态</text>
-    </view>
-  </view>
+  <view class="logout-btn" bindtap="logout">退出登录</view>
 </view>

@@ -1,25 +1,20 @@
 Component({
   properties: {
-    dish: {
-      type: Object,
-      value: {}
-    }
+    dish: { type: Object, value: {} }
   },
-
   methods: {
     onAdd() {
-      this.triggerEvent('add', { 
-        id: this.data.dish.id,
-        dish: this.data.dish 
+      const d = this.data.dish
+      this.triggerEvent('add', {
+        id: d.id,
+        dish: { id: d.id, name: d.dishName || d.name, price: d.price, image: d.image || d.imageUrl }
       })
     },
-
     onDetail() {
       this.triggerEvent('detail', { id: this.data.dish.id })
     },
-
     onImgError() {
-      this.setData({ 'dish.imageUrl': '' })
+      this.setData({ 'dish.image': '' })
     }
   }
 })

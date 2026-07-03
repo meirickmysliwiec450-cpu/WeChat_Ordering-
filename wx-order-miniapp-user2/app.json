@@ -11,7 +11,12 @@
     "pages/order_detail/order_detail",
     "pages/profile/profile",
     "pages/feedback/feedback",
-    "pages/nutrition/nutrition"
+    "pages/nutrition/nutrition",
+    "pages/order_review/order_review",
+    "pages/my_reviews/my_reviews",
+    "pages/address/address",
+    "pages/edit_profile/edit_profile",
+    "pages/payments/payments"
   ],
   "window": {
     "navigationBarTitleText": "微信点餐系统",
@@ -58,5 +63,6 @@
     ]
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
 }

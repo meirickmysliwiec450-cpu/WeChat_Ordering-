@@ -51,17 +51,22 @@ public class WxOrderServiceImpl implements WxOrderService {
             System.out.println("  [WxOrderService] 收货地址：" + addr.getReceiver());
         }
 
-        // 2. 校验商品状态、构建明细
+        // 2. 校验商品状态+库存、构建明细
         List<Map<String, Object>> validItems = new ArrayList<>();
         for (Map<String, Object> item : itemList) {
             Long dishId = Long.valueOf(item.get("dishId").toString());
+            Integer count = Integer.valueOf(item.get("count").toString());
             Dish dish = dishMapper.selectById(dishId);
             // 菜品上架状态1才允许下单
-            if (dish != null && dish.getStatus() != null && dish.getStatus() == 1) {
-                validItems.add(item);
-            } else {
+            if (dish == null || dish.getStatus() == null || dish.getStatus() != 1) {
                 System.out.println("  [WxOrderService] 菜品ID " + dishId + " 未上架或不存在，跳过");
+                continue;
             }
+            // 库存检查
+            if (dish.getStock() != null && dish.getStock() < count) {
+                throw new RuntimeException("「" + dish.getDishName() + "」库存不足，仅剩" + dish.getStock() + "件");
+            }
+            validItems.add(item);
         }
         if (validItems.isEmpty()) {
             throw new RuntimeException("没有可下单的菜品");
