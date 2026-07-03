@@ -19,11 +19,25 @@ public class WxOrderController {
     @PostMapping
     public Result<Map<String, Object>> submit(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         Long userId = (Long) request.getAttribute("userId");
-        Long addressId = params.get("addressId") != null ? ((Number) params.get("addressId")).longValue() : null;
+        String diningType = (String) params.get("diningType");
+        Long addressId = null;
+        Object aidObj = params.get("addressId");
+
+        // 仅外送强制校验地址ID
+        if ("takeout".equals(diningType)) {
+            if (aidObj == null) {
+                return Result.error("请选择收货地址");
+            }
+            addressId = ((Number) aidObj).longValue();
+            if (addressId <= 0) {
+                return Result.error("请选择收货地址");
+            }
+        }
+        // 堂食场景：无论前端传0还是不传，addressId保持null，不需要额外赋值
+
         String remark = (String) params.get("remark");
-        if (addressId == null) return Result.error("addressId不能为空");
         try {
-            return Result.success(wxOrderService.submit(userId, addressId, remark));
+            return Result.success(wxOrderService.submit(userId, addressId, params));
         } catch (RuntimeException e) {
             return Result.error(e.getMessage());
         }
@@ -61,4 +75,21 @@ public class WxOrderController {
             return Result.error(e.getMessage());
         }
     }
+
+    /** 修改订单 */
+    @PutMapping("/{id}")
+    public Result<?> updateOrder(
+            HttpServletRequest request,
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> params
+    ) {
+        Long userId = (Long) request.getAttribute("userId");
+        try {
+            wxOrderService.updateOrder(userId, id, params);
+            return Result.success();
+        } catch (RuntimeException e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
 }
