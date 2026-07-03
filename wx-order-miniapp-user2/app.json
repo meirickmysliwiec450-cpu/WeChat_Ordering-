@@ -9,8 +9,10 @@
     "pages/checkout/checkout",
     "pages/orders/orders",
     "pages/order_detail/order_detail",
+    "pages/order_comment/order_comment",
     "pages/profile/profile",
-    "pages/feedback/feedback"
+    "pages/feedback/feedback",
+    "pages/comment_detail/comment_detail"
   ],
   "window": {
     "navigationBarTitleText": "微信点餐系统",

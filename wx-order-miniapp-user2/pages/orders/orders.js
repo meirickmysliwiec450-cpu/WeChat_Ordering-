@@ -122,28 +122,27 @@ Page({
     }
 
     return {
-      id: String(item.id || item.orderId || item.orderNo || ''),
-      createTime: item.createTime || item.createdTime || item.orderTime || '',
-      status,
-      statusText: item.statusText || this.getStatusText(status),
+      id: String(item.id || ''),
+      createTime: item.createTime || '',
+      orderStatus:item.orderStatus,
+      statusText: this.getStatusText(item.orderStatus),
       diningType: item.diningType || item.type || '',
       diningTypeText: item.diningTypeText || (item.diningType === 'takeout' ? '外送' : '堂食'),
       items,
       totalCount: Number(item.totalCount) || items.reduce((sum, dish) => sum + dish.count, 0),
-      totalPrice: Number(item.totalPrice || item.amount || item.totalAmount) || items.reduce((sum, dish) => sum + dish.price * dish.count, 0),
+      totalPrice: item.payAmount,
+      orderNo: item.orderNo || '',
       address: item.address || '',
-      tableInfo: item.tableInfo || '',
       remark: item.remark || '',
-      feedback: item.feedback || null
     }
   },
 
   getStatusText(status) {
     const statusMap = {
-      pending: '待支付',
-      paid: '已支付',
-      completed: '已完成',
-      cancelled: '已取消'
+      3: '待支付',
+      1: '已支付',
+      2: '已完成',
+      0: '已取消'
     }
     return statusMap[status] || status || '未知状态'
   },
@@ -269,8 +268,8 @@ Page({
     })
   },
 
-  goFeedback(event) {
-    wx.navigateTo({ url: `/pages/feedback/feedback?orderId=${event.currentTarget.dataset.id}` })
+  goComment(event) {
+    wx.navigateTo({ url: `/pages/order_comment/order_comment?orderId=${event.currentTarget.dataset.id}` })
   },
 
   deleteOrder(event) {

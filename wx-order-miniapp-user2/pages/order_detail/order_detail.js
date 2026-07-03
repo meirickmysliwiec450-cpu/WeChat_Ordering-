@@ -96,7 +96,7 @@ Page({
       address: item.address || '',
       tableInfo: item.tableInfo || '',
       remark: item.remark || '',
-      feedback: item.feedback || null
+      comment: item.comment || null
     }
   },
 
@@ -116,8 +116,66 @@ Page({
     this.setData({ order, loading: false })
   },
 
-  goFeedback() {
+  loadComment(orderId) {
+    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+    if (!baseUrl) {
+      this.loadCommentLocal(orderId)
+      return
+    }
+
+    wx.request({
+      url: `${baseUrl}/wx/comments/order/${orderId}`,
+      method: 'GET',
+      header: {
+        Authorization: getToken() ? `Bearer ${getToken()}` : ''
+      },
+      success: res => {
+        const ok = res.statusCode >= 200 && res.statusCode < 300
+        if (!ok) {
+          this.loadCommentLocal(orderId)
+          return
+        }
+        const comment = this.normalizeComment(res.data)
+        this.setData({ comment })
+      },
+      fail: () => {
+        this.loadCommentLocal(orderId)
+      }
+    })
+  },
+
+  normalizeComment(responseData) {
+    const raw = responseData && responseData.data ? responseData.data : responseData
+    if (!raw || typeof raw !== 'object') return null
+
+    const photoUrl = raw.photoUrl || raw.imageUrl || raw.imgUrl || raw.picUrl || raw.fileUrl || raw.url || raw.photo || ''
+    return {
+      id: String(raw.id || raw.commentId || ''),
+      content: raw.content || raw.text || raw.comment || raw.description || '',
+      photoUrl,
+      createTime: raw.createTime || raw.createdTime || raw.time || ''
+    }
+  },
+
+  loadCommentLocal(orderId) {
+    const feedbacks = wx.getStorageSync('feedbacks') || []
+    const fb = feedbacks.find(item => String(item.orderId) === String(orderId))
+    this.setData({
+      comment: fb ? {
+        id: fb.id,
+        content: fb.content,
+        photoUrl: fb.photo,
+        createTime: fb.time
+      } : null
+    })
+  },
+
+  goCommentDetail() {
     if (!this.data.order) return
-    wx.navigateTo({ url: `/pages/feedback/feedback?orderId=${this.data.order.id}` })
+    wx.navigateTo({ url: `/pages/comment-detail/comment-detail?orderId=${this.data.order.id}` })
+  },
+  goComment() {
+    if (!this.data.order) return
+    wx.navigateTo({ url: `/pages/order_comment/order_comment?orderId=${this.data.order.id}` })
   }
 })

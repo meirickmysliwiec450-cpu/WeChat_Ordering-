@@ -31,8 +31,8 @@
       <text class="muted">查看订单状态</text>
     </view>
     <view class="menu-item" bindtap="goFeedback">
-      <text>菜品反馈</text>
-      <text class="muted">向管理员反馈商品信息</text>
+      <text>功能反馈</text>
+      <text class="muted">向管理员反馈信息</text>
     </view>
     <view class="menu-item">
       <text>客服电话</text>

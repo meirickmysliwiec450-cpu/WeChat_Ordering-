@@ -67,17 +67,17 @@
   flex-shrink: 0;
 }
 
-.feedback-card {
+.comment-card {
   margin-top: 24rpx;
 }
 
-.feedback-content {
+.comment-content {
   display: block;
   margin-top: 14rpx;
   line-height: 1.6;
 }
 
-.feedback-btn {
+.comment-btn {
   width: 100%;
   margin-top: 28rpx;
 }
