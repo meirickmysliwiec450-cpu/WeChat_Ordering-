@@ -74,7 +74,10 @@ Page({
       success: res => {
         if (res.statusCode >= 200 && res.statusCode < 300 && res.data.code === 200) {
           wx.showToast({ title: '评价成功', icon: 'success' })
-          setTimeout(() => wx.navigateBack(), 1000)
+          // 跳转到订单详情页查看评价结果
+          setTimeout(() => {
+            wx.redirectTo({ url: `/pages/order_detail/order_detail?id=${this.data.orderId}` })
+          }, 800)
         } else {
           wx.showToast({ title: res.data?.message || '评价失败', icon: 'none' })
           this.setData({ submitting: false })

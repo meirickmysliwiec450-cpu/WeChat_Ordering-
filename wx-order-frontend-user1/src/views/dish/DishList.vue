@@ -96,7 +96,7 @@
                   :key="img.name"
                   class="image-item"
                   :class="{ selected: form.image === img.url }"
-                  @click="form.image = img.url"
+                  @click="form.image = img.path"
                 >
                   <el-image :src="img.url" style="width:100%;height:80px" fit="cover" />
                   <span class="image-name">{{ img.shortName }}</span>

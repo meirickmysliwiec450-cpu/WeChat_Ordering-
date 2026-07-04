@@ -7,9 +7,13 @@
   border-radius: 24rpx; text-align: center; color: #fff;
 }
 .avatar-circle {
-  width: 100rpx; height: 100rpx; line-height: 100rpx; border-radius: 50%;
-  background: rgba(255,255,255,0.2); font-size: 42rpx; font-weight: 800;
+  width: 100rpx; height: 100rpx; border-radius: 50%;
+  background: rgba(255,255,255,0.2);
   margin: 0 auto 16rpx;
+  overflow: hidden;
+}
+.avatar-text {
+  line-height: 100rpx; font-size: 42rpx; font-weight: 800; text-align: center;
 }
 .head-name { font-size: 36rpx; font-weight: 800; display: block; }
 .head-arrow { font-size: 24rpx; opacity: 0.8; display: block; margin-top: 8rpx; }

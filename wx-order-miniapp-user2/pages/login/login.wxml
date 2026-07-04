@@ -4,9 +4,33 @@
     <text class="title">微信点餐系统</text>
     <text class="desc">登录后可查看菜单、加入购物车、下单支付、查看订单并提交菜品反馈。</text>
 
-    <button class="login-btn" loading="{{loading}}" disabled="{{loading}}" bindtap="handleLogin">
+    <!-- 第一步：微信登录 -->
+    <button wx:if="{{!loggedIn}}" class="login-btn" loading="{{loading}}" disabled="{{loading}}" bindtap="handleLogin">
       {{loading ? '登录中...' : '微信一键登录'}}
     </button>
 
+    <!-- 第二步：新用户设置头像昵称（登录成功后自动展示） -->
+    <view wx:if="{{loggedIn && needProfile}}" class="profile-setup">
+      <view class="divider">
+        <view class="divider-line"></view>
+        <text class="divider-text">完善个人信息</text>
+        <view class="divider-line"></view>
+      </view>
+      <text class="setup-tip">设置后可在"我的"页面随时修改</text>
+
+      <button class="avatar-picker" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+        <image class="avatar-preview" src="{{avatarUrl || '/assets/default-avatar.png'}}" mode="aspectFill" />
+        <text class="avatar-tip">点击选择微信头像</text>
+      </button>
+
+      <view class="nickname-input-wrap">
+        <text class="input-label">昵称</text>
+        <input class="nickname-input" type="nickname" placeholder="请输入昵称" value="{{nickName}}" bindinput="onNickNameInput" bindblur="onNickNameBlur" bindconfirm="onNickNameBlur" />
+      </view>
+
+      <button class="login-btn profile-done-btn" loading="{{savingProfile}}" bindtap="submitProfile">
+        完成
+      </button>
+    </view>
   </view>
 </view>

@@ -4,7 +4,12 @@ Page({
   data: {
     orderId: '',
     hasReviewed: false,
+    reviewScore: 0,
+    reviewStars: [],
+    reviewContent: '',
+    reviewTime: '',
     order: null,
+    comment: null,
     loading: true
   },
 
@@ -12,6 +17,7 @@ Page({
     this.setData({ orderId: options.id || '' })
     this.loadOrderDetail(options.id || '')
     this.checkReviewStatus(options.id || '')
+    this.loadComment(options.id || '')
   },
 
   loadOrderDetail(orderId) {
@@ -180,7 +186,15 @@ Page({
       header: { Authorization: `Bearer ${getToken()}` },
       success: res => {
         if (res.data?.code === 200 && res.data.data?.length > 0) {
-          this.setData({ hasReviewed: true })
+          const reviewData = res.data.data[0]
+          const score = reviewData.score || 0
+          this.setData({
+            hasReviewed: true,
+            reviewScore: score,
+            reviewStars: Array.from({ length: score }, (_, i) => i),
+            reviewContent: reviewData.content || '',
+            reviewTime: reviewData.createTime || ''
+          })
         }
       }
     })
@@ -194,5 +208,83 @@ Page({
   goComment() {
     if (!this.data.order) return
     wx.navigateTo({ url: `/pages/feedback/feedback?orderId=${this.data.order.id}` })
+  },
+
+  payOrder() {
+    if (!this.data.order) return
+    wx.showModal({
+      title: '确认支付',
+      content: '确认支付该订单？',
+      success: res => {
+        if (!res.confirm) return
+        const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+        wx.request({
+          url: `${baseUrl}/wx/orders/${this.data.order.id}`,
+          method: 'PUT',
+          header: { 'content-type': 'application/json', Authorization: `Bearer ${getToken()}` },
+          data: { orderStatus: 1 },
+          success: apiRes => {
+            if (apiRes.data?.code === 200) {
+              wx.showToast({ title: '支付成功', icon: 'success' })
+              this.loadOrderDetail(this.data.orderId)
+              this.setData({ hasReviewed: false })
+            } else {
+              wx.showToast({ title: apiRes.data?.message || '支付失败', icon: 'none' })
+            }
+          },
+          fail: () => wx.showToast({ title: '网络异常', icon: 'none' })
+        })
+      }
+    })
+  },
+
+  cancelOrder() {
+    if (!this.data.order) return
+    wx.showModal({
+      title: '取消订单',
+      content: '确定取消该订单？',
+      success: res => {
+        if (!res.confirm) return
+        const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+        wx.request({
+          url: `${baseUrl}/wx/orders/${this.data.order.id}/cancel`,
+          method: 'PUT',
+          header: { Authorization: `Bearer ${getToken()}` },
+          success: () => {
+            wx.showToast({ title: '已取消', icon: 'success' })
+            this.loadOrderDetail(this.data.orderId)
+          },
+          fail: () => wx.showToast({ title: '操作失败', icon: 'none' })
+        })
+      }
+    })
+  },
+
+  finishOrder() {
+    if (!this.data.order) return
+    wx.showModal({
+      title: '确认收餐',
+      content: '确认已收到餐品？',
+      success: res => {
+        if (!res.confirm) return
+        const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+        wx.request({
+          url: `${baseUrl}/wx/orders/${this.data.order.id}`,
+          method: 'PUT',
+          header: { 'content-type': 'application/json', Authorization: `Bearer ${getToken()}` },
+          data: { orderStatus: 2 },
+          success: apiRes => {
+            if (apiRes.data?.code === 200) {
+              wx.showToast({ title: '已确认', icon: 'success' })
+              this.loadOrderDetail(this.data.orderId)
+              this.checkReviewStatus(this.data.orderId)
+            } else {
+              wx.showToast({ title: apiRes.data?.message || '操作失败', icon: 'none' })
+            }
+          },
+          fail: () => wx.showToast({ title: '网络异常', icon: 'none' })
+        })
+      }
+    })
   }
 })

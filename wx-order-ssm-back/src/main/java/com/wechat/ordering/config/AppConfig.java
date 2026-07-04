@@ -27,8 +27,22 @@ public class AppConfig {
     /** 将相对路径解析为完整URL */
     public static String resolveImage(String imagePath) {
         if (imagePath == null || imagePath.isEmpty()) return imagePath;
-        if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) return imagePath;
         if (imagePath.startsWith("data:")) return imagePath;
+
+        // 如果存的是本系统的绝对URL（换了IP/localhost），提取相对路径后重新拼接当前base-url
+        if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
+            int idx = imagePath.indexOf("/images/");
+            if (idx > 0) {
+                // 提取 /images/... 相对路径
+                String relative = imagePath.substring(idx);
+                String base = INSTANCE.baseUrl;
+                if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
+                return base + relative;
+            }
+            // 外部URL，原样返回
+            return imagePath;
+        }
+
         String base = INSTANCE.baseUrl;
         if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
         if (!imagePath.startsWith("/")) imagePath = "/" + imagePath;

@@ -20,6 +20,7 @@ public class WxOrderServiceImpl implements WxOrderService {
     @Autowired private CartMapper cartMapper;
     @Autowired private DishMapper dishMapper;
     @Autowired private AddressMapper addressMapper;
+    @Autowired private PaymentMapper paymentMapper;
 
     @Override
     @Transactional
@@ -78,14 +79,14 @@ public class WxOrderServiceImpl implements WxOrderService {
         System.out.println("  [WxOrderService] 生成订单号：" + orderNo);
 
         // 4. 构建订单实体（区分堂食/外送赋值收货信息）
-        // 直接设为已支付状态，用户下单即支付成功
+        // 下单时为待支付状态，用户支付后才变为已支付
         Order.OrderBuilder orderBuilder = Order.builder()
                 .orderNo(orderNo)
                 .userId(userId)
                 .totalAmount(totalAmount)
                 .payAmount(totalAmount)
-                .payStatus(1)         // 已支付（用户下单即支付）
-                .orderStatus(1)       // 已支付（状态值已重构：3=待支付 1=已支付 2=已完成 0=已取消）
+                .payStatus(0)         // 未支付
+                .orderStatus(3)       // 待支付（3=待支付 1=已支付 2=已完成 0=已取消）
                 .remark(remark)
                 .addressId(addressId) // 堂食为null，外送为真实ID
                 .createTime(LocalDateTime.now());
@@ -100,7 +101,7 @@ public class WxOrderServiceImpl implements WxOrderService {
         System.out.println("  [WxOrderService] 准备插入订单...");
         orderMapper.insert(order);
         Order savedOrder = orderMapper.selectByOrderNo(orderNo);
-        System.out.println("  [WxOrderService] 订单插入成功，ID：" + savedOrder.getId());
+        System.out.println("  [WxOrderService] 订单插入成功，ID：" + savedOrder.getId() + "，状态：待支付");
 
         // 5. 插入订单明细、更新菜品库存销量
         for (Map<String, Object> item : validItems) {
@@ -239,8 +240,8 @@ public class WxOrderServiceImpl implements WxOrderService {
                 case 3: // 待支付：可改为 已支付1 / 已取消0
                     if (targetStatus == 1 || targetStatus == 0) allowChange = true;
                     break;
-                case 1: // 已支付：只能改为已完成2/已取消0
-                    if (targetStatus == 2|| targetStatus == 0) allowChange = true;
+                case 1: // 已支付：只能改为已完成2，不能取消
+                    if (targetStatus == 2) allowChange = true;
                     break;
                 case 2: // 已完成 不可修改
                 case 0: // 已取消 不可修改
@@ -252,6 +253,22 @@ public class WxOrderServiceImpl implements WxOrderService {
             }
             // 校验通过才赋值
             order.setOrderStatus(targetStatus);
+
+            // 从待支付→已支付时，创建支付记录（积分 = 1元 = 1分）
+            if (currentStatus == 3 && targetStatus == 1) {
+                order.setPayStatus(1);
+                order.setPayAmount(order.getTotalAmount());
+                Payment payment = Payment.builder()
+                        .orderId(order.getId())
+                        .payNo("PAY" + order.getOrderNo())
+                        .payAmount(order.getTotalAmount())
+                        .payMethod("wechat")
+                        .payTime(LocalDateTime.now())
+                        .createTime(LocalDateTime.now())
+                        .build();
+                paymentMapper.insert(payment);
+                System.out.println("  [WxOrderService] 支付记录创建成功，金额：" + order.getTotalAmount());
+            }
         }
 
         orderMapper.update(order);

@@ -32,8 +32,9 @@ public class DashboardServiceImpl implements DashboardService {
         int totalDishes = dishMapper.selectAll().size();
         int pendingFeedbacks = feedbackMapper.selectByStatus(0).size();
 
-        // 计算总营业额
+        // 计算总营业额（只统计已支付和已完成的订单）
         BigDecimal totalRevenue = allOrders.stream()
+                .filter(o -> o.getOrderStatus() != null && (o.getOrderStatus() == 1 || o.getOrderStatus() == 2))
                 .map(o -> o.getPayAmount() != null ? o.getPayAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 

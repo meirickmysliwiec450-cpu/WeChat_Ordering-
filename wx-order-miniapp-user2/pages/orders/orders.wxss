@@ -100,3 +100,10 @@
   border: none !important;
   font-weight: 600;
 }
+
+.view-review-btn {
+  background: #fff !important;
+  color: #1989fa !important;
+  border: 2rpx solid #1989fa !important;
+  font-weight: 600;
+}

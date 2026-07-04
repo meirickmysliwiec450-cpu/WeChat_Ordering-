@@ -1,8 +1,9 @@
 <view class="page">
   <!-- 头像区 -->
   <view class="head-card" bindtap="goEditProfile">
-    <view class="avatar-circle">{{profile.avatarText}}</view>
-    <text class="head-name">{{profile.nickname || '微信用户'}}</text>
+    <image class="avatar-circle" wx:if="{{profile.avatar}}" src="{{profile.avatar}}" mode="aspectFill" />
+    <view class="avatar-circle avatar-text" wx:else>{{profile.avatarText || '微'}}</view>
+    <text class="head-name">{{profile.nickName || '微信用户'}}</text>
     <text class="head-arrow">查看个人信息 ›</text>
   </view>
 

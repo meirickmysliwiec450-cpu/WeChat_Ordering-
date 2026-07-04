@@ -43,7 +43,7 @@
     </el-card>
 
     <!-- 新增/编辑弹窗 -->
-    <el-dialog :title="isEdit ? '编辑轮播图' : '新增轮播图'" v-model="dialogVisible" width="700px">
+    <el-dialog :title="isEdit ? '编辑轮播图' : '新增轮播图'" v-model="dialogVisible" width="800px">
       <el-form :model="form" label-width="80px">
         <el-form-item label="标题"><el-input v-model="form.title" placeholder="请输入轮播图标题" /></el-form-item>
         <el-form-item label="图片URL">
@@ -54,7 +54,7 @@
           <el-image :src="form.imageUrl" style="width:200px;height:120px;border-radius:6px" fit="cover" />
         </el-form-item>
         <!-- 从菜品库选择图片 -->
-        <el-form-item label="选择菜品图片">
+        <el-form-item label="菜品图片">
           <div class="image-picker">
             <div v-if="dishList.length === 0" style="color:#909399;font-size:13px;margin-bottom:8px">
               暂无菜品，请先在菜品管理中上架菜品
@@ -69,7 +69,6 @@
               >
                 <el-image :src="dish.image" style="width:100%;height:80px" fit="cover" />
                 <span class="image-name">{{ dish.dishName }}</span>
-                <span class="image-price">¥{{ dish.price }}</span>
               </div>
             </div>
           </div>
@@ -119,9 +118,15 @@ async function fetchDishes() {
   } catch (e) { /* 忽略 */ }
 }
 
+function relativePath(url) {
+  if (!url) return ''
+  const idx = url.indexOf('/images/')
+  return idx >= 0 ? url.substring(idx) : url
+}
+
 function selectDish(dish) {
-  form.value.imageUrl = dish.image
-  form.value.title = dish.dishName || form.value.title
+  form.value.imageUrl = relativePath(dish.image)
+  form.value.title = form.value.title || dish.dishName
 }
 
 function handleAdd() {

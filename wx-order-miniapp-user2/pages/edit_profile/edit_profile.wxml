@@ -1,13 +1,16 @@
 <view class="page">
   <view class="avatar-section">
-    <view class="avatar-big">{{profile.avatarText}}</view>
-    <text class="avatar-hint">点击修改头像</text>
+    <button class="avatar-picker-btn" open-type="chooseAvatar" bindchooseavatar="onChooseAvatar">
+      <image class="avatar-big" wx:if="{{profile.avatar}}" src="{{profile.avatar}}" mode="aspectFill" />
+      <view class="avatar-big avatar-text-big" wx:else>{{profile.avatarText}}</view>
+      <text class="avatar-hint">点击更换微信头像</text>
+    </button>
   </view>
 
   <view class="form-card">
     <view class="form-row">
       <text class="form-label">昵称</text>
-      <input class="form-input" value="{{profile.nickname}}" placeholder="请输入昵称" bindinput="onField" data-key="nickname" />
+      <input class="form-input" type="nickname" value="{{profile.nickName}}" placeholder="请输入昵称" bindinput="onNickNameInput" bindblur="onNickNameInput" />
     </view>
     <view class="form-row">
       <text class="form-label">手机号</text>
@@ -15,5 +18,5 @@
     </view>
   </view>
 
-  <button class="save-btn" bindtap="saveProfile">保存修改</button>
+  <button class="save-btn" bindtap="saveProfile" loading="{{saving}}">{{saving ? '保存中...' : '保存修改'}}</button>
 </view>

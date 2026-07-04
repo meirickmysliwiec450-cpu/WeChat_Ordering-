@@ -44,6 +44,28 @@ Page({
     this.setData({ activeTab: e.currentTarget.dataset.tab })
   },
 
+  // ========== 图片下载（手机兼容） ==========
+  downloadImages(list, key, callback) {
+    if (!list || !list.length) { callback && callback(list); return }
+    let done = 0
+    list.forEach((item, i) => {
+      const url = item[key || 'image']
+      if (!url || url.startsWith('data:') || url.startsWith('wxfile:')) {
+        done++; if (done === list.length && callback) callback(list); return
+      }
+      wx.downloadFile({
+        url,
+        success: res => {
+          if (res.statusCode === 200) item[key || 'image'] = res.tempFilePath
+        },
+        complete: () => {
+          done++
+          if (done === list.length && callback) callback(list)
+        }
+      })
+    })
+  },
+
   // ========== 快捷提问 ==========
   quickAsk(e) {
     const text = e.currentTarget.dataset.text

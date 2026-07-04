@@ -25,7 +25,7 @@ function requireLogin() {
 }
 
 function buildUrl(path) {
-  const baseUrl = (getApp().globalData.baseUrl || 'http://172.20.10.10:8080/api').replace(/\/$/, '')
+  const baseUrl = (getApp().globalData.baseUrl || 'http://192.168.79.146:8080/api').replace(/\/$/, '')
   return `${baseUrl}${path}`
 }
 
@@ -34,7 +34,7 @@ function imageUrl(url) {
   if (!url) return ''
   // 相对路径 → 完整URL
   if (!url.startsWith('http')) {
-    const base = (getApp().globalData.baseUrl || 'http://172.20.10.10:8080/api').replace(/\/$/, '')
+    const base = (getApp().globalData.baseUrl || 'http://192.168.79.146:8080/api').replace(/\/$/, '')
     url = base + (url.startsWith('/') ? '' : '/') + url
   }
   // 已是 base64 不重复加
@@ -55,15 +55,19 @@ function loginByCode() {
   return new Promise((resolve, reject) => {
     // ========== 配置：可切换正式/测试模式 ==========
     const USE_TEST_MODE = true; // true=测试模式(直接传openId)，false=正式微信登录
-    
+
     if (USE_TEST_MODE) {
       // 测试模式：直接传openId，不用调用微信接口
       console.log("========== 开始测试模式登录 ==========")
-      const testOpenId = 'test-openid-' + Date.now()
-      const testNickName = '答辩演示用户'
-      
+      // 持久化 testOpenId，确保"同一个微信用户"每次登录识别为同一个人
+      let testOpenId = wx.getStorageSync('_test_openid') || ''
+      if (!testOpenId) {
+        testOpenId = 'test-openid-' + Date.now()
+        wx.setStorageSync('_test_openid', testOpenId)
+      }
+
       console.log("测试openId：", testOpenId)
-      
+
       wx.request({
         url: buildUrl('/wx/user/login'),
         method: 'POST',
@@ -71,29 +75,27 @@ function loginByCode() {
           'content-type': 'application/json'
         },
         data: {
-          openId: testOpenId,
-          nickName: testNickName,
-          avatar: ''
+          openId: testOpenId
         },
         success(res) {
           console.log("========== 登录接口响应 ==========")
           console.log("完整响应：", res)
           console.log("响应数据：", res.data)
-          
+
           if (res.data.code !== 200) {
             reject(new Error(res.data.message || "登录失败"))
             return
           }
-          
+
           const result = normalizeLoginResult(res.data)
           console.log("解析结果：", result)
-          
+
           wx.setStorageSync('token', result.token)
           wx.setStorageSync('userInfo', result.userInfo || {})
-          
+
           console.log("已保存token到Storage：", result.token)
           console.log("已保存userInfo到Storage：", result.userInfo)
-          
+
           resolve(result)
         },
         fail(error) {

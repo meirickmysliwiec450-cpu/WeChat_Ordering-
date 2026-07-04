@@ -76,7 +76,7 @@ function createOrder(data) {
   const orders = wx.getStorageSync('orders') || []
   const now = new Date()
   const order = Object.assign({
-    id: 'O' + now.getTime(),
+    id: '' + now.getTime(),
     createTime: formatTime(now),
     status: 'paid',
     statusText: '已支付'

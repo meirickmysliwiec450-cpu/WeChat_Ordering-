@@ -77,5 +77,7 @@
   line-height: 1.6;
 }
 
+.review-stars { margin-top: 8rpx; font-size: 28rpx; letter-spacing: 4rpx; }
 .review-btn { width: 100%; margin-bottom: 14rpx; background: linear-gradient(135deg, #ff9800, #f57c00); color: #fff; border: none; }
+.review-update-btn { background: #fff !important; color: #ff9800 !important; border: 2rpx solid #ff9800 !important; }
 .comment-btn { width: 100%; margin-top: 0; margin-bottom: 14rpx; }

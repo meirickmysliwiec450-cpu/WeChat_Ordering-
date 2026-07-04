@@ -39,10 +39,13 @@
       <text class="price">￥{{item.totalPrice}}</text>
     </view>
     <view class="actions">
-      <button wx:if="{{item.orderStatus === 3}}" class="btn-outline small-btn" data-id="{{item.id}}" catchtap="payOrder">继续支付</button>
-      <button wx:if="{{item.orderStatus === 3 || item.orderStatus === 1}}" class="btn-plain small-btn" data-id="{{item.id}}" catchtap="cancelOrder">取消订单</button>
+      <button wx:if="{{item.orderStatus === 3}}" class="btn-primary small-btn" data-id="{{item.id}}" catchtap="payOrder">去支付</button>
+      <button wx:if="{{item.orderStatus === 3}}" class="btn-plain small-btn" data-id="{{item.id}}" catchtap="cancelOrder">取消订单</button>
       <button wx:if="{{item.orderStatus === 1}}" class="btn-primary small-btn" data-id="{{item.id}}" catchtap="finishOrder">确认收餐</button>
-      <button wx:if="{{item.orderStatus === 2}}" class="btn-primary review-action-btn" data-id="{{item.id}}" data-orderno="{{item.orderNo}}" catchtap="goReview">⭐ 订单评价</button>
+      <!-- 已完成未评价：显示评价按钮 -->
+      <button wx:if="{{item.orderStatus === 2 && !reviewStatusMap[item.id]}}" class="btn-primary review-action-btn small-btn" data-id="{{item.id}}" data-orderno="{{item.orderNo}}" catchtap="goReview">⭐ 订单评价</button>
+      <!-- 已完成已评价：显示查看评价按钮 -->
+      <button wx:if="{{item.orderStatus === 2 && reviewStatusMap[item.id]}}" class="btn-outline view-review-btn small-btn" data-id="{{item.id}}" catchtap="goViewReview">📋 查看评价</button>
     </view>
   </view>
 </view>

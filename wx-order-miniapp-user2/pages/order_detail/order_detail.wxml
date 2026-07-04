@@ -46,25 +46,32 @@
       </view>
     </view>
 
-    <!-- <view class="card comment-card" wx:if="{{order.comment}}">
-      <text class="label">反馈内容</text>
-      <text class="comment-content">{{order.comment.content}}</text>
-    </view>
-
-    <button wx:if="{{order.status === 'completed'}}" class="btn-primary comment-btn" bindtap="goComment">照片反馈</button> -->
-
-    <view class="card comment-card" wx:if="{{comment && comment.content}}">
+    <!-- 已完成已评价：显示评价内容 -->
+    <view class="card comment-card" wx:if="{{order.status === 'completed' && hasReviewed}}">
       <view class="between">
-        <text class="label">反馈内容</text>
-        <text class="muted">{{comment.createTime}}</text>
+        <text class="label">我的评价</text>
+        <text class="muted">{{reviewTime}}</text>
       </view>
-      <text class="comment-content">{{comment.content}}</text>
-      <image wx:if="{{comment.photoUrl}}" src="{{comment.photoUrl}}" mode="aspectFill" class="comment-photo" binderror="onPhotoError"></image>
+      <view class="review-stars" wx:if="{{reviewScore > 0}}">
+        <text wx:for="{{reviewStars}}" wx:key="*this">⭐</text>
+      </view>
+      <text class="comment-content" wx:if="{{reviewContent}}">{{reviewContent}}</text>
+      <text class="comment-content muted" wx:else>未填写文字评价</text>
     </view>
 
+    <!-- 待支付订单 -->
+    <block wx:if="{{order.status === 'pending'}}">
+      <button class="btn-primary review-btn" bindtap="payOrder">💰 去支付</button>
+      <button class="btn-plain review-btn" bindtap="cancelOrder">取消订单</button>
+    </block>
+    <!-- 已支付订单 -->
+    <block wx:if="{{order.status === 'paid'}}">
+      <button class="btn-primary review-btn" bindtap="finishOrder">✅ 确认收餐</button>
+    </block>
     <!-- 已完成订单的操作按钮 -->
     <block wx:if="{{order.status === 'completed'}}">
-      <button class="btn-primary review-btn" bindtap="goReview">{{hasReviewed ? '✏️ 追加评价' : '⭐ 订单评价'}}</button>
+      <button wx:if="{{!hasReviewed}}" class="btn-primary review-btn" bindtap="goReview">⭐ 订单评价</button>
+      <button wx:if="{{hasReviewed}}" class="review-btn review-update-btn" bindtap="goReview">✏️ 追加评价</button>
     </block>
   </block>
 </view>

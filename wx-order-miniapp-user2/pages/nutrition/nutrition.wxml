@@ -34,7 +34,7 @@
       <scroll-view class="rec-row" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{recDishes.length > 0}}">
         <view class="dish-card" wx:for="{{recDishes}}" wx:key="id" bindtap="goDishDetail" data-id="{{item.id}}">
           <view class="dish-img-wrap">
-            <image class="dish-img" src="{{item.image}}" mode="aspectFill" lazy-load />
+            <image class="dish-img" src="{{item.image}}" mode="aspectFill" />
             <view class="dish-tag" wx:if="{{item.categoryName}}">{{item.categoryName}}</view>
           </view>
           <view class="dish-info">
@@ -54,7 +54,7 @@
         <text>根据「{{lastQuery}}」为你找到</text>
       </view>
       <view class="result-item" wx:for="{{chatDishes}}" wx:key="id" bindtap="goDishDetail" data-id="{{item.id}}">
-        <image class="result-img" src="{{item.image}}" mode="aspectFill" lazy-load />
+        <image class="result-img" src="{{item.image}}" mode="aspectFill" />
         <view class="result-body">
           <view class="result-top">
             <text class="result-name">{{item.dishName}}</text>
