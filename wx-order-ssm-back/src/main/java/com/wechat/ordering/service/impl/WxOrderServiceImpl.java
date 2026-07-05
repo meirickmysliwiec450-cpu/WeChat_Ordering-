@@ -20,16 +20,22 @@ public class WxOrderServiceImpl implements WxOrderService {
     @Autowired private CartMapper cartMapper;
     @Autowired private DishMapper dishMapper;
     @Autowired private AddressMapper addressMapper;
+    @Autowired private PaymentMapper paymentMapper;
 
     @Override
     @Transactional
     public Map<String, Object> submit(Long userId, Long addressId, Map<String, Object> params) {
+        System.out.println("  [WxOrderService] 开始处理订单，用户ID：" + userId);
+        
         // 1. 从前端参数解析基础字段
         String remark = (String) params.get("remark");
         String diningType = (String) params.get("diningType");
         String tableInfo = (String) params.get("tableInfo");
         BigDecimal totalAmount = new BigDecimal(params.get("totalPrice").toString());
         List<Map<String, Object>> itemList = (List<Map<String, Object>>) params.get("items");
+
+        System.out.println("  [WxOrderService] 订单金额：" + totalAmount);
+        System.out.println("  [WxOrderService] 订单项数量：" + (itemList != null ? itemList.size() : 0));
 
         if (itemList == null || itemList.isEmpty()) {
             throw new RuntimeException("购物车为空，无法下单");
@@ -38,21 +44,30 @@ public class WxOrderServiceImpl implements WxOrderService {
         Address addr = null;
         // 只有外送才查询收货地址
         if ("takeout".equals(diningType) && addressId != null) {
+            System.out.println("  [WxOrderService] 查询收货地址，ID：" + addressId);
             addr = addressMapper.selectById(addressId);
             if (addr == null || !addr.getUserId().equals(userId)) {
                 throw new RuntimeException("收货地址不存在");
             }
+            System.out.println("  [WxOrderService] 收货地址：" + addr.getReceiver());
         }
 
-        // 2. 校验商品状态、构建明细
+        // 2. 校验商品状态+库存、构建明细
         List<Map<String, Object>> validItems = new ArrayList<>();
         for (Map<String, Object> item : itemList) {
             Long dishId = Long.valueOf(item.get("dishId").toString());
+            Integer count = Integer.valueOf(item.get("count").toString());
             Dish dish = dishMapper.selectById(dishId);
             // 菜品上架状态1才允许下单
-            if (dish != null && dish.getStatus() != null && dish.getStatus() == 1) {
-                validItems.add(item);
+            if (dish == null || dish.getStatus() == null || dish.getStatus() != 1) {
+                System.out.println("  [WxOrderService] 菜品ID " + dishId + " 未上架或不存在，跳过");
+                continue;
             }
+            // 库存检查
+            if (dish.getStock() != null && dish.getStock() < count) {
+                throw new RuntimeException("「" + dish.getDishName() + "」库存不足，仅剩" + dish.getStock() + "件");
+            }
+            validItems.add(item);
         }
         if (validItems.isEmpty()) {
             throw new RuntimeException("没有可下单的菜品");
@@ -61,15 +76,17 @@ public class WxOrderServiceImpl implements WxOrderService {
         // 3. 生成订单号
         String orderNo = "WX" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
                 + String.format("%04d", new Random().nextInt(10000));
+        System.out.println("  [WxOrderService] 生成订单号：" + orderNo);
 
         // 4. 构建订单实体（区分堂食/外送赋值收货信息）
+        // 下单时为待支付状态，用户支付后才变为已支付
         Order.OrderBuilder orderBuilder = Order.builder()
                 .orderNo(orderNo)
                 .userId(userId)
                 .totalAmount(totalAmount)
                 .payAmount(totalAmount)
-                .payStatus(0) // 未支付
-                .orderStatus(1) // 待处理
+                .payStatus(0)         // 未支付
+                .orderStatus(3)       // 待支付（3=待支付 1=已支付 2=已完成 0=已取消）
                 .remark(remark)
                 .addressId(addressId) // 堂食为null，外送为真实ID
                 .createTime(LocalDateTime.now());
@@ -79,13 +96,12 @@ public class WxOrderServiceImpl implements WxOrderService {
             orderBuilder.receiver(addr.getReceiver())
                     .receiverPhone(addr.getPhone());
         }
-        // 如果你的Order实体有tableInfo/diningType字段，追加：
-        // .tableInfo(tableInfo)
-        // .diningType(diningType)
 
         Order order = orderBuilder.build();
+        System.out.println("  [WxOrderService] 准备插入订单...");
         orderMapper.insert(order);
         Order savedOrder = orderMapper.selectByOrderNo(orderNo);
+        System.out.println("  [WxOrderService] 订单插入成功，ID：" + savedOrder.getId() + "，状态：待支付");
 
         // 5. 插入订单明细、更新菜品库存销量
         for (Map<String, Object> item : validItems) {
@@ -105,6 +121,7 @@ public class WxOrderServiceImpl implements WxOrderService {
                     .createTime(LocalDateTime.now())
                     .build();
             orderDetailMapper.insert(detail);
+            System.out.println("  [WxOrderService] 插入订单项：" + dish.getDishName() + " x " + count);
 
             // 更新销量、扣库存
             dish.setSales((dish.getSales() != null ? dish.getSales() : 0) + count);
@@ -114,6 +131,7 @@ public class WxOrderServiceImpl implements WxOrderService {
 
         // 6. 清空当前用户购物车（和原有逻辑一致）
         List<Cart> userCarts = cartMapper.selectByUserId(userId);
+        System.out.println("  [WxOrderService] 清空购物车，数量：" + userCarts.size());
         for (Cart c : userCarts) {
             cartMapper.deleteById(c.getId());
         }
@@ -123,12 +141,17 @@ public class WxOrderServiceImpl implements WxOrderService {
         result.put("orderId", savedOrder.getId());
         result.put("orderNo", savedOrder.getOrderNo());
         result.put("totalAmount", savedOrder.getTotalAmount());
+        System.out.println("  [WxOrderService] 订单创建完成！");
         return result;
     }
 
     @Override
     public Map<String, Object> list(Long userId, Integer page, Integer pageSize, Integer status) {
+        System.out.println("  [WxOrderService] 开始查询订单列表，用户ID：" + userId);
+        System.out.println("  [WxOrderService] 分页参数：page=" + page + ", pageSize=" + pageSize + ", status=" + status);
+        
         List<Order> all = orderMapper.selectByUserId(userId);
+        System.out.println("  [WxOrderService] 数据库查询到订单数量：" + all.size());
         if (status != null) {
             all.removeIf(o -> !o.getOrderStatus().equals(status));
         }
@@ -139,11 +162,37 @@ public class WxOrderServiceImpl implements WxOrderService {
         int to = Math.min(from + pageSize, total);
         List<Order> pageList = all.subList(Math.min(from, total), to);
 
+        // 为每个订单加载详情
+        List<Map<String, Object>> orderListWithDetails = new ArrayList<>();
+        for (Order order : pageList) {
+            Map<String, Object> orderMap = new HashMap<>();
+            // 订单基本信息
+            orderMap.put("id", order.getId());
+            orderMap.put("orderNo", order.getOrderNo());
+            orderMap.put("userId", order.getUserId());
+            orderMap.put("totalAmount", order.getTotalAmount());
+            orderMap.put("payAmount", order.getPayAmount());
+            orderMap.put("payStatus", order.getPayStatus());
+            orderMap.put("orderStatus", order.getOrderStatus());
+            orderMap.put("remark", order.getRemark());
+            orderMap.put("addressId", order.getAddressId());
+            orderMap.put("receiver", order.getReceiver());
+            orderMap.put("receiverPhone", order.getReceiverPhone());
+            orderMap.put("createTime", order.getCreateTime());
+            
+            // 加载订单详情
+            List<OrderDetail> details = orderDetailMapper.selectByOrderId(order.getId());
+            orderMap.put("items", details);
+            
+            orderListWithDetails.add(orderMap);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("total", total);
-        result.put("list", pageList);
+        result.put("list", orderListWithDetails);
         result.put("page", page);
         result.put("pageSize", pageSize);
+        System.out.println("  [WxOrderService] 返回订单列表，数量：" + orderListWithDetails.size());
         return result;
     }
 
@@ -163,7 +212,7 @@ public class WxOrderServiceImpl implements WxOrderService {
     public void cancel(Long userId, Long orderId) {
         Order order = orderMapper.selectById(orderId);
         if (order == null || !order.getUserId().equals(userId)) throw new RuntimeException("订单不存在");
-        if (order.getOrderStatus() != 1) throw new RuntimeException("只有待处理状态的订单才能取消");
+        if (order.getOrderStatus() != 3) throw new RuntimeException("只有待支付状态的订单才能取消");
         order.setOrderStatus(0); // 已取消
         orderMapper.update(order);
     }
@@ -191,8 +240,8 @@ public class WxOrderServiceImpl implements WxOrderService {
                 case 3: // 待支付：可改为 已支付1 / 已取消0
                     if (targetStatus == 1 || targetStatus == 0) allowChange = true;
                     break;
-                case 1: // 已支付：只能改为已完成2/已取消0
-                    if (targetStatus == 2|| targetStatus == 0) allowChange = true;
+                case 1: // 已支付：只能改为已完成2，不能取消
+                    if (targetStatus == 2) allowChange = true;
                     break;
                 case 2: // 已完成 不可修改
                 case 0: // 已取消 不可修改
@@ -204,6 +253,22 @@ public class WxOrderServiceImpl implements WxOrderService {
             }
             // 校验通过才赋值
             order.setOrderStatus(targetStatus);
+
+            // 从待支付→已支付时，创建支付记录（积分 = 1元 = 1分）
+            if (currentStatus == 3 && targetStatus == 1) {
+                order.setPayStatus(1);
+                order.setPayAmount(order.getTotalAmount());
+                Payment payment = Payment.builder()
+                        .orderId(order.getId())
+                        .payNo("PAY" + order.getOrderNo())
+                        .payAmount(order.getTotalAmount())
+                        .payMethod("wechat")
+                        .payTime(LocalDateTime.now())
+                        .createTime(LocalDateTime.now())
+                        .build();
+                paymentMapper.insert(payment);
+                System.out.println("  [WxOrderService] 支付记录创建成功，金额：" + order.getTotalAmount());
+            }
         }
 
         orderMapper.update(order);

@@ -1,5 +1,6 @@
 package com.wechat.ordering.service.impl;
 
+import com.wechat.ordering.config.AppConfig;
 import com.wechat.ordering.entity.Banner;
 import com.wechat.ordering.mapper.BannerMapper;
 import com.wechat.ordering.service.BannerService;
@@ -17,12 +18,18 @@ public class BannerServiceImpl implements BannerService {
 
     @Override
     public List<Banner> list() {
-        return bannerMapper.selectAll();
+        List<Banner> banners = bannerMapper.selectAll();
+        banners.forEach(b -> b.setImageUrl(AppConfig.resolveImage(b.getImageUrl())));
+        return banners;
     }
 
     @Override
     public Banner getById(Long id) {
-        return bannerMapper.selectById(id);
+        Banner banner = bannerMapper.selectById(id);
+        if (banner != null) {
+            banner.setImageUrl(AppConfig.resolveImage(banner.getImageUrl()));
+        }
+        return banner;
     }
 
     @Override

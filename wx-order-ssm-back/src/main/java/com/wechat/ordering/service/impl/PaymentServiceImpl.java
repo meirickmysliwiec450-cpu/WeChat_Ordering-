@@ -15,11 +15,10 @@ public class PaymentServiceImpl implements PaymentService {
     private PaymentMapper paymentMapper;
 
     @Override
-    public Map<String, Object> list(Integer page, Integer pageSize, Long orderId) {
+    public Map<String, Object> list(Integer page, Integer pageSize, String startDate, String endDate) {
         List<Payment> all;
-        if (orderId != null) {
-            Payment payment = paymentMapper.selectByOrderId(orderId);
-            all = payment != null ? Collections.singletonList(payment) : new ArrayList<>();
+        if (startDate != null && !startDate.isEmpty() && endDate != null && !endDate.isEmpty()) {
+            all = paymentMapper.selectByDateRange(startDate, endDate);
         } else {
             all = paymentMapper.selectAll();
         }

@@ -17,13 +17,29 @@ public class OrderCommentServiceImpl implements OrderCommentService {
     private OrderCommentMapper orderCommentMapper;
 
     @Override
-    public Map<String, Object> list(Integer page, Integer pageSize, Long orderId) {
+    public Map<String, Object> list(Integer page, Integer pageSize, Long orderId, String startDate, String endDate) {
         List<OrderComment> all;
         if (orderId != null) {
             all = orderCommentMapper.selectByOrderId(orderId);
         } else {
             all = orderCommentMapper.selectAll();
         }
+
+        // 按日期范围过滤
+        if (startDate != null && !startDate.isEmpty()) {
+            String start = startDate + " 00:00:00";
+            all.removeIf(c -> c.getCreateTime() == null || c.getCreateTime().toString().compareTo(start) < 0);
+        }
+        if (endDate != null && !endDate.isEmpty()) {
+            String end = endDate + " 23:59:59";
+            all.removeIf(c -> c.getCreateTime() == null || c.getCreateTime().toString().compareTo(end) > 0);
+        }
+
+        // 按时间倒序
+        all.sort((a, b) -> {
+            if (a.getCreateTime() == null || b.getCreateTime() == null) return 0;
+            return b.getCreateTime().compareTo(a.getCreateTime());
+        });
 
         int total = all.size();
         int fromIndex = (page - 1) * pageSize;

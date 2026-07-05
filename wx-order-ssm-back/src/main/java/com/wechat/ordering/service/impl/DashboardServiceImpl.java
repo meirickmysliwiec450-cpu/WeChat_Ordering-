@@ -32,8 +32,9 @@ public class DashboardServiceImpl implements DashboardService {
         int totalDishes = dishMapper.selectAll().size();
         int pendingFeedbacks = feedbackMapper.selectByStatus(0).size();
 
-        // 计算总营业额
+        // 计算总营业额（只统计已支付和已完成的订单）
         BigDecimal totalRevenue = allOrders.stream()
+                .filter(o -> o.getOrderStatus() != null && (o.getOrderStatus() == 1 || o.getOrderStatus() == 2))
                 .map(o -> o.getPayAmount() != null ? o.getPayAmount() : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -43,10 +44,10 @@ public class DashboardServiceImpl implements DashboardService {
                 .filter(o -> o.getCreateTime() != null && o.getCreateTime().toLocalDate().equals(today))
                 .count();
 
-        // 各状态订单数
-        long pendingOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 1).count();
-        long acceptedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 2).count();
-        long completedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 3).count();
+        // 各状态订单数: 3=待支付, 1=已支付, 2=已完成
+        long pendingOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 3).count();
+        long acceptedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 1).count();
+        long completedOrders = allOrders.stream().filter(o -> o.getOrderStatus() == 2).count();
 
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalUsers", totalUsers);

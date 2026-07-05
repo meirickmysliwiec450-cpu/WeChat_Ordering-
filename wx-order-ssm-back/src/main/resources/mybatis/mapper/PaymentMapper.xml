@@ -28,6 +28,21 @@
         FROM t_payment WHERE `order-id` = #{orderId}
     </select>
 
+    <select id="selectByDateRange" resultMap="PaymentResultMap">
+        <![CDATA[
+        SELECT id, `order-id`, `pay-no`, `pay-amount`, `pay-method`, `pay-time`, `create-time`
+        FROM t_payment
+        WHERE `pay-time` >= #{startDate} AND `pay-time` < DATE_ADD(#{endDate}, INTERVAL 1 DAY)
+        ORDER BY `pay-time` DESC
+        ]]>
+    </select>
+
+    <select id="selectByUserId" resultMap="PaymentResultMap">
+        SELECT p.id, p.`order-id`, p.`pay-no`, p.`pay-amount`, p.`pay-method`, p.`pay-time`, p.`create-time`
+        FROM t_payment p JOIN t_order o ON p.`order-id` = o.id
+        WHERE o.`user-id` = #{userId} ORDER BY p.`create-time` DESC
+    </select>
+
     <insert id="insert" parameterType="Payment" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO t_payment (`order-id`, `pay-no`, `pay-amount`, `pay-method`, `pay-time`, `create-time`)
         VALUES (#{orderId}, #{payNo}, #{payAmount}, #{payMethod}, #{payTime}, #{createTime})

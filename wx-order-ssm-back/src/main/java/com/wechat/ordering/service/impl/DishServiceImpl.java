@@ -1,5 +1,6 @@
 package com.wechat.ordering.service.impl;
 
+import com.wechat.ordering.config.AppConfig;
 import com.wechat.ordering.entity.Dish;
 import com.wechat.ordering.mapper.DishMapper;
 import com.wechat.ordering.service.DishService;
@@ -44,6 +45,9 @@ public class DishServiceImpl implements DishService {
         int toIndex = Math.min(fromIndex + pageSize, total);
         List<Dish> pageList = all.subList(Math.min(fromIndex, total), toIndex);
 
+        // 将图片相对路径解析为完整URL
+        pageList.forEach(d -> d.setImage(AppConfig.resolveImage(d.getImage())));
+
         Map<String, Object> result = new HashMap<>();
         result.put("total", total);
         result.put("list", pageList);
@@ -54,7 +58,11 @@ public class DishServiceImpl implements DishService {
 
     @Override
     public Dish getById(Long id) {
-        return dishMapper.selectById(id);
+        Dish dish = dishMapper.selectById(id);
+        if (dish != null) {
+            dish.setImage(AppConfig.resolveImage(dish.getImage()));
+        }
+        return dish;
     }
 
     @Override

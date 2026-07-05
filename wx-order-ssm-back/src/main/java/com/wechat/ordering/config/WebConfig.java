@@ -9,7 +9,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Spring MVC 配置 - 跨域请求支持 + 认证拦截器 + 图片静态资源
@@ -23,23 +24,18 @@ public class WebConfig implements WebMvcConfigurer {
     @Autowired
     private WxAuthInterceptor wxAuthInterceptor;
 
-    /** 前端 public/images 的绝对路径 */
-    private static final String IMAGES_PATH =
-        System.getProperty("user.dir") + "/../wx-order-frontend-user1/public/images";
-
+    /** 图片目录绝对路径 */
+    private static final String IMAGES_DIR = System.getProperty("user.dir")
+        + "/../wx-order-frontend-user1/public/images";
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // ========== 原有代码 完全不动 ==========
-        String absolutePath = new File(IMAGES_PATH).getAbsolutePath();
+        // 用 Path.toUri() 生成 file:/// URL，它会自动处理中文路径编码
+        Path imagePath = Paths.get(IMAGES_DIR).toAbsolutePath().normalize();
         registry.addResourceHandler("/images/**")
-                .addResourceLocations("file:" + absolutePath + "/");
-
-        // ========== 新增：上传图片/upload 映射（核心修复） ==========
-        // 访问路径前缀 /upload/** 对应磁盘 D:/upload/
-        registry.addResourceHandler("/upload/**")
-                .addResourceLocations("file:D:/upload/");
+                .addResourceLocations(imagePath.toUri().toString());
     }
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
@@ -55,11 +51,11 @@ public class WebConfig implements WebMvcConfigurer {
         // 管理端认证拦截器
         registry.addInterceptor(authInterceptor)
                 .addPathPatterns("/admin/**")
-                .excludePathPatterns("/admin/auth/login","/upload/**");
+                .excludePathPatterns("/admin/auth/login", "/admin/upload/image");
         // 小程序端认证拦截器
         registry.addInterceptor(wxAuthInterceptor)
                 .addPathPatterns("/wx/**")
-                .excludePathPatterns("/wx/user/login","/upload/**");
+                .excludePathPatterns("/wx/user/login");
     }
 
     @Bean

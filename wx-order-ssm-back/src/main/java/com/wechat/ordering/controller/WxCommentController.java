@@ -69,4 +69,11 @@ public class WxCommentController {
     public Result<List<OrderComment>> getByOrderId(@PathVariable Long id) {
         return Result.success(wxCommentService.getByOrderId(id));
     }
+
+    /** 查看我的所有评价 */
+    @GetMapping("/my")
+    public Result<List<OrderComment>> getMyComments(HttpServletRequest request) {
+        Long userId = (Long) request.getAttribute("userId");
+        return Result.success(wxCommentService.getByUserId(userId));
+    }
 }

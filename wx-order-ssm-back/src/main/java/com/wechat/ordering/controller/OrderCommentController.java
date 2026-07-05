@@ -19,8 +19,10 @@ public class OrderCommentController {
     public Result<Map<String, Object>> list(
             @RequestParam(defaultValue = "1") Integer page,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) Long orderId) {
-        return Result.success(orderCommentService.list(page, pageSize, orderId));
+            @RequestParam(required = false) Long orderId,
+            @RequestParam(required = false) String startDate,
+            @RequestParam(required = false) String endDate) {
+        return Result.success(orderCommentService.list(page, pageSize, orderId, startDate, endDate));
     }
 
     @GetMapping("/{id}")

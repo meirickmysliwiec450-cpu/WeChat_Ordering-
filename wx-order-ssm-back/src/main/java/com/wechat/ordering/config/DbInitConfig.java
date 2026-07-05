@@ -5,6 +5,9 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * 数据库初始化：自动添加营养字段和对话表（如果不存在）
  */
@@ -44,5 +47,87 @@ public class DbInitConfig implements CommandLineRunner {
         try {
             jdbcTemplate.update("UPDATE t_admin SET role='super_admin', status=1 WHERE username='admin'");
         } catch (Exception e) { /* 忽略 */ }
+        
+        // ========== 自动添加示例饮品数据 ==========
+        try {
+            initSampleDrinks();
+        } catch (Exception e) {
+            System.out.println("添加饮品数据时出错：" + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    /**
+     * 初始化示例饮品数据
+     */
+    private void initSampleDrinks() {
+        // 1. 先查询饮品分类ID
+        List<Map<String, Object>> categories = jdbcTemplate.queryForList(
+            "SELECT id FROM t_category WHERE `category-name` = '饮品'");
+        
+        if (categories.isEmpty()) {
+            System.out.println("未找到饮品分类，先创建分类...");
+            jdbcTemplate.update(
+                "INSERT INTO t_category (`category-name`, sort, `create-time`) VALUES (?, ?, NOW())",
+                "饮品", 6);
+            categories = jdbcTemplate.queryForList(
+                "SELECT id FROM t_category WHERE `category-name` = '饮品'");
+        }
+        
+        Long categoryId = ((Number) categories.get(0).get("id")).longValue();
+        System.out.println("饮品分类ID: " + categoryId);
+        
+        // 2. 检查是否已有饮品数据
+        List<Map<String, Object>> existingDrinks = jdbcTemplate.queryForList(
+            "SELECT id FROM t_dish WHERE `category-id` = ?", categoryId);
+        
+        if (!existingDrinks.isEmpty()) {
+            System.out.println("数据库中已有 " + existingDrinks.size() + " 个饮品，跳过添加");
+            return;
+        }
+        
+        // 3. 添加示例饮品
+        System.out.println("开始添加示例饮品数据...");
+        
+        // 冰红茶
+        try {
+            jdbcTemplate.update(
+                "INSERT INTO t_dish (`category-id`, `dish-name`, image, price, description, sales, stock, status, `create-time`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+                categoryId, "冰红茶", "/images/drinks/ice_tea.png", 6.00, "经典冰红茶，清凉解暑", 0, 100, 1);
+            System.out.println("✓ 已添加：冰红茶");
+        } catch (Exception e) {
+            System.out.println("添加冰红茶失败：" + e.getMessage());
+        }
+        
+        // 多肉葡萄冰萃
+        try {
+            jdbcTemplate.update(
+                "INSERT INTO t_dish (`category-id`, `dish-name`, image, price, description, sales, stock, status, `create-time`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+                categoryId, "多肉葡萄冰萃", "/images/drinks/grape_drink.png", 18.00, "新鲜葡萄，多肉多汁", 0, 50, 1);
+            System.out.println("✓ 已添加：多肉葡萄冰萃");
+        } catch (Exception e) {
+            System.out.println("添加多肉葡萄冰萃失败：" + e.getMessage());
+        }
+        
+        // 美年达
+        try {
+            jdbcTemplate.update(
+                "INSERT INTO t_dish (`category-id`, `dish-name`, image, price, description, sales, stock, status, `create-time`) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+                categoryId, "美年达", "/images/drinks/mirinda.png", 5.00, "橙味汽水，清爽解渴", 0, 80, 1);
+            System.out.println("✓ 已添加：美年达");
+        } catch (Exception e) {
+            System.out.println("添加美年达失败：" + e.getMessage());
+        }
+        
+        // 4. 验证添加结果
+        List<Map<String, Object>> drinks = jdbcTemplate.queryForList(
+            "SELECT `dish-name`, price FROM t_dish WHERE `category-id` = ?", categoryId);
+        System.out.println("饮品数据添加完成！共 " + drinks.size() + " 个饮品：");
+        for (Map<String, Object> drink : drinks) {
+            System.out.println("  - " + drink.get("dish-name") + " ¥" + drink.get("price"));
+        }
     }
 }

@@ -2,12 +2,16 @@ package com.wechat.ordering.service.impl;
 
 import com.wechat.ordering.entity.Order;
 import com.wechat.ordering.entity.OrderDetail;
+import com.wechat.ordering.entity.Payment;
 import com.wechat.ordering.mapper.OrderDetailMapper;
 import com.wechat.ordering.mapper.OrderMapper;
+import com.wechat.ordering.mapper.PaymentMapper;
 import com.wechat.ordering.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +24,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderDetailMapper orderDetailMapper;
+
+    @Autowired
+    private PaymentMapper paymentMapper;
 
     @Override
     public Map<String, Object> list(Integer page, Integer pageSize, Integer orderStatus) {
@@ -63,8 +70,19 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("订单不存在");
         }
         order.setOrderStatus(orderStatus);
-        // 如果订单完成，同时更新支付状态
-        if (orderStatus == 3) {
+        // 已支付(1)：记录支付流水
+        if (orderStatus == 1 && paymentMapper.selectByOrderId(id) == null) {
+            Payment payment = Payment.builder()
+                .orderId(id)
+                .payNo("PAY" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss")))
+                .payAmount(order.getPayAmount())
+                .payMethod("微信支付")
+                .payTime(LocalDateTime.now())
+                .createTime(LocalDateTime.now()).build();
+            paymentMapper.insert(payment);
+        }
+        // 已完成(2)：标记已支付
+        if (orderStatus == 2) {
             order.setPayStatus(1);
         }
         orderMapper.update(order);

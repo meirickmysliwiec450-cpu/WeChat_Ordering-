@@ -1,5 +1,6 @@
 package com.wechat.ordering.controller;
 
+import com.wechat.ordering.config.AppConfig;
 import com.wechat.ordering.entity.Dish;
 import com.wechat.ordering.mapper.DishMapper;
 import com.wechat.ordering.util.Result;
@@ -21,6 +22,7 @@ public class WxDishController {
     public Result<List<Dish>> byCategory(@RequestParam(required = false) Long categoryId) {
         List<Dish> dishes = (categoryId != null) ? dishMapper.selectByCategoryId(categoryId) : dishMapper.selectAll();
         dishes = dishes.stream().filter(d -> d.getStatus() != null && d.getStatus() == 1).collect(Collectors.toList());
+        dishes.forEach(d -> d.setImage(AppConfig.resolveImage(d.getImage())));
         return Result.success(dishes);
     }
 
@@ -31,6 +33,7 @@ public class WxDishController {
                 .filter(d -> d.getStatus() != null && d.getStatus() == 1)
                 .filter(d -> d.getDishName() != null && d.getDishName().contains(keyword))
                 .collect(Collectors.toList());
+        result.forEach(d -> d.setImage(AppConfig.resolveImage(d.getImage())));
         return Result.success(result);
     }
 
@@ -39,6 +42,7 @@ public class WxDishController {
     public Result<Dish> getById(@PathVariable Long id) {
         Dish dish = dishMapper.selectById(id);
         if (dish == null) return Result.error("菜品不存在");
+        dish.setImage(AppConfig.resolveImage(dish.getImage()));
         return Result.success(dish);
     }
 }

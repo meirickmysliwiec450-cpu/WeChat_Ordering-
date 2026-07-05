@@ -8,6 +8,7 @@ public interface OrderCommentMapper {
     List<OrderComment> selectAll();
     OrderComment selectById(Long id);
     List<OrderComment> selectByOrderId(@Param("orderId") Long orderId);
+    List<OrderComment> selectByUserId(@Param("userId") Long userId);
     int insert(OrderComment orderComment);
     int update(OrderComment orderComment);
     int deleteById(Long id);
