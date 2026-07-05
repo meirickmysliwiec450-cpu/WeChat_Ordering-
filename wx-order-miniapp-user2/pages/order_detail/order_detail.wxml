@@ -46,11 +46,32 @@
       </view>
     </view>
 
+    <!-- 已完成已评价：显示评价内容 -->
+    <view class="card comment-card" wx:if="{{order.status === 'completed' && hasReviewed}}">
+      <view class="between">
+        <text class="label">我的评价</text>
+        <text class="muted">{{reviewTime}}</text>
+      </view>
+      <view class="review-stars" wx:if="{{reviewScore > 0}}">
+        <text wx:for="{{reviewStars}}" wx:key="*this">⭐</text>
+      </view>
+      <text class="comment-content" wx:if="{{reviewContent}}">{{reviewContent}}</text>
+      <text class="comment-content muted" wx:else>未填写文字评价</text>
+    </view>
 
+    <!-- 待支付订单 -->
+    <block wx:if="{{order.status === 'pending'}}">
+      <button class="btn-primary review-btn" bindtap="payOrder">💰 去支付</button>
+      <button class="btn-plain review-btn" bindtap="cancelOrder">取消订单</button>
+    </block>
+    <!-- 已支付订单 -->
+    <block wx:if="{{order.status === 'paid'}}">
+      <button class="btn-primary review-btn" bindtap="finishOrder">✅ 确认收餐</button>
+    </block>
     <!-- 已完成订单的操作按钮 -->
     <block wx:if="{{order.status === 'completed'}}">
-      <button wx:if="{{comment}}" class="btn-outline comment-btn" bindtap="goCommentDetail">查看反馈</button>
-      <button wx:else class="btn-primary comment-btn" bindtap="goComment">照片反馈</button>
+      <button wx:if="{{!hasReviewed}}" class="btn-primary review-btn" bindtap="goReview">⭐ 订单评价</button>
+      <button wx:if="{{hasReviewed}}" class="review-btn review-update-btn" bindtap="goReview">✏️ 追加评价</button>
     </block>
   </block>
 </view>

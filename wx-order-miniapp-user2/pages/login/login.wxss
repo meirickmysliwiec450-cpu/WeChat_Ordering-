@@ -63,3 +63,82 @@
   color: #999999;
   font-size: 23rpx;
 }
+
+/* 资料完善区域 */
+.profile-setup {
+  margin-top: 20rpx;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin: 20rpx 0 10rpx;
+}
+.divider-line {
+  flex: 1;
+  height: 1rpx;
+  background: #e0e0e0;
+}
+.divider-text {
+  font-size: 26rpx;
+  color: #999;
+  white-space: nowrap;
+}
+
+.setup-tip {
+  display: block;
+  font-size: 22rpx;
+  color: #b0b0b0;
+  margin-bottom: 32rpx;
+}
+
+.avatar-picker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  padding: 28rpx;
+  margin: 0 20rpx 28rpx;
+  border: 2rpx dashed #ddd;
+  border-radius: 20rpx;
+  background: #fafafa;
+}
+
+.avatar-preview {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 999rpx;
+  background: #eee;
+}
+
+.avatar-tip {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.nickname-input-wrap {
+  display: flex;
+  align-items: center;
+  margin: 0 20rpx 36rpx;
+  padding: 16rpx 24rpx;
+  border: 1rpx solid #e0e0e0;
+  border-radius: 14rpx;
+  background: #fafafa;
+}
+.input-label {
+  font-size: 28rpx;
+  color: #333;
+  margin-right: 16rpx;
+  flex-shrink: 0;
+}
+.nickname-input {
+  flex: 1;
+  font-size: 28rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+}
+
+.profile-done-btn {
+  background: linear-gradient(135deg, #07c160, #06ad56) !important;
+}

@@ -7,7 +7,7 @@
   <block wx:else>
     <view class="cart-list">
       <view class="cart-item card" wx:for="{{cart}}" wx:key="id">
-        <view class="cart-img" style="background: {{item.imageColor}};"></view>
+        <image class="cart-img" src="{{item.image}}" mode="aspectFill" />
         <view class="cart-info">
           <view class="between">
             <text class="cart-name">{{item.name}}</text>

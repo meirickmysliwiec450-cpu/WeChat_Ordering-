@@ -23,23 +23,32 @@ Page({
       return
     }
 
+    // 调用单品详情接口 /wx/dishes/{id}，不是列表接口
     wx.request({
-      url: `${baseUrl}/wx/dishes`,
+      url: `${baseUrl}/wx/dishes/${dishId}`,
       method: 'GET',
-      data: { id: dishId },
       header: {
         Authorization: getToken() ? `Bearer ${getToken()}` : ''
       },
       success: res => {
-        if (res.statusCode < 200 || res.statusCode >= 300) {
+        if (res.statusCode < 200 || res.statusCode >= 300 || !res.data || res.data.code !== 200) {
           this.useFallbackDetail(dishId)
           return
         }
-
-        const detail = this.normalizeDetail(res.data)
-        if (!detail) {
+        const raw = res.data.data
+        if (!raw) {
           this.useFallbackDetail(dishId)
           return
+        }
+        const detail = {
+          id: String(raw.id || ''),
+          categoryId: String(raw.categoryId || ''),
+          name: raw.dishName || '未命名菜品',
+          desc: raw.description || '',
+          price: Number(raw.price) || 0,
+          sales: Number(raw.sales) || 0,
+          stock: Number(raw.stock) || 0,
+          imageUrl: raw.image || ''
         }
         this.setData({ dish: detail, loading: false })
       },
@@ -86,8 +95,9 @@ Page({
       wx.showToast({ title: '请先选择堂食或外送', icon: 'none' })
       return
     }
-    if (!this.data.dish) return
-    addToCart(this.data.dish.id)
+    const dish = this.data.dish
+    if (!dish) return
+    addToCart({ id: dish.id, name: dish.name, price: dish.price, image: dish.imageUrl })
     wx.showToast({ title: '已加入购物栏', icon: 'success' })
   },
 

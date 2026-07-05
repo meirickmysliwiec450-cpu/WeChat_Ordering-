@@ -1,0 +1,124 @@
+<view class="page">
+  <!-- 毛玻璃头部 -->
+  <view class="glass-header">
+    <view class="glass-bg"></view>
+    <view class="glass-content">
+      <text class="glass-icon">🤖</text>
+      <view class="glass-text">
+        <text class="glass-title">AI 美食助理</text>
+        <text class="glass-sub">智能推荐 · 营养分析 · 膳食建议</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 精致 Tab -->
+  <view class="nav-tabs">
+    <view class="nav-tab {{activeTab === 'recommend' ? 'nav-active' : ''}}" bindtap="switchTab" data-tab="recommend">
+      <text class="nav-icon">🍽️</text>
+      <text>智能推荐</text>
+    </view>
+    <view class="nav-tab {{activeTab === 'nutrition' ? 'nav-active' : ''}}" bindtap="switchTab" data-tab="nutrition">
+      <text class="nav-icon">🥗</text>
+      <text>营养助手</text>
+    </view>
+  </view>
+
+  <!-- ==================== 智能推荐 ==================== -->
+  <view class="tab-body" wx:if="{{activeTab === 'recommend'}}">
+    <scroll-view class="scroll-area" scroll-y="true" enhanced show-scrollbar="{{false}}">
+      <!-- 今日推荐 -->
+      <view class="sec-title" wx:if="{{recDishes.length > 0}}">
+        <text class="sec-dot"></text>
+        <text>{{recPeriod}}推荐</text>
+      </view>
+      <scroll-view class="rec-row" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{recDishes.length > 0}}">
+        <view class="dish-card" wx:for="{{recDishes}}" wx:key="id" bindtap="goDishDetail" data-id="{{item.id}}">
+          <view class="dish-img-wrap">
+            <image class="dish-img" src="{{item.image}}" mode="aspectFill" />
+            <view class="dish-tag" wx:if="{{item.categoryName}}">{{item.categoryName}}</view>
+          </view>
+          <view class="dish-info">
+            <text class="dish-name">{{item.dishName}}</text>
+            <text class="dish-reason">{{item.reason}}</text>
+            <view class="dish-foot">
+              <text class="dish-price">¥{{item.price}}</text>
+              <view class="pill-btn" catchtap="addCartFromRec" data-id="{{item.id}}">＋ 加购</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 偏好搜索结果 -->
+      <view class="sec-title" wx:if="{{chatDishes.length > 0}}">
+        <text class="sec-dot"></text>
+        <text>根据「{{lastQuery}}」为你找到</text>
+      </view>
+      <view class="result-item" wx:for="{{chatDishes}}" wx:key="id" bindtap="goDishDetail" data-id="{{item.id}}">
+        <image class="result-img" src="{{item.image}}" mode="aspectFill" />
+        <view class="result-body">
+          <view class="result-top">
+            <text class="result-name">{{item.dishName}}</text>
+            <text class="result-tag" wx:if="{{item.categoryName}}">{{item.categoryName}}</text>
+          </view>
+          <text class="result-reason">{{item.reason}}</text>
+          <view class="result-foot">
+            <text class="result-price">¥{{item.price}}</text>
+            <view class="pill-btn" catchtap="addCartFromRec" data-id="{{item.id}}">＋ 加购</view>
+          </view>
+        </view>
+      </view>
+      <view style="height:16rpx"></view>
+    </scroll-view>
+
+    <!-- 偏好输入区 -->
+    <view class="pref-bar">
+      <view class="chip-row" wx:if="{{chatDishes.length === 0}}">
+        <scroll-view class="chip-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+          <view class="chip" bindtap="quickAsk" data-text="推荐几道清淡的菜">推荐几道清淡的菜</view>
+          <view class="chip" bindtap="quickAsk" data-text="有没有适合单人餐的">有没有适合单人餐的</view>
+          <view class="chip" bindtap="quickAsk" data-text="我想吃辣的有什么推荐">我想吃辣的有什么推荐</view>
+          <view class="chip" bindtap="quickAsk" data-text="帮我搭配一荤一素">帮我搭配一荤一素</view>
+          <view class="chip" bindtap="quickAsk" data-text="今天有什么新品推荐">今天有什么新品推荐</view>
+        </scroll-view>
+      </view>
+      <view class="input-row">
+        <input class="pref-input" value="{{prefText}}" placeholder="输入口味偏好，或点击上方快捷提问…" bindinput="onPrefInput" confirm-type="send" bindconfirm="sendPreference" />
+        <button class="pill-send" bindtap="sendPreference" disabled="{{prefText === '' || prefLoading}}">{{prefLoading ? '…' : '发送'}}</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ==================== 营养助手 ==================== -->
+  <view class="tab-body" wx:if="{{activeTab === 'nutrition'}}">
+    <view class="report-bar">
+      <view class="report-btn" bindtap="generateReport">
+        <text class="report-icon">📊</text>
+        <text>{{reportLoading ? 'AI 分析中…' : '生成个人饮食周报'}}</text>
+      </view>
+    </view>
+    <scroll-view class="msg-list" scroll-y="true" scroll-top="{{scrollTop}}" enhanced show-scrollbar="{{false}}">
+      <view class="report-card" wx:if="{{report}}">
+        <text class="rp-title">📋 7 天饮食周报 · 共 {{report.orderCount}} 笔</text>
+        <text class="rp-body">{{report.report}}</text>
+      </view>
+      <view class="msg-row {{item.role === 'user' ? 'msg-right' : 'msg-left'}}" wx:for="{{messages}}" wx:key="index">
+        <text class="msg-avatar">{{item.role === 'user' ? '👤' : '🤖'}}</text>
+        <view class="msg-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+          <text>{{item.content}}</text>
+        </view>
+      </view>
+      <view class="msg-empty" wx:if="{{messages.length === 0 && !report}}">
+        <text class="empty-icon">💬</text>
+        <text class="empty-title">有什么营养问题想问我？</text>
+        <view class="empty-chips">
+          <text class="chip" bindtap="quickNutrition" data-text="我今天点的菜营养怎么样">我今天点的菜营养怎么样</text>
+          <text class="chip" bindtap="quickNutrition" data-text="帮我分析一下最近的饮食">帮我分析一下最近的饮食</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="input-bar">
+      <input class="msg-input" value="{{inputText}}" placeholder="输入营养问题…" bindinput="onInput" confirm-type="send" bindconfirm="sendMessage" />
+      <button class="pill-send" bindtap="sendMessage" disabled="{{inputText === '' || chatLoading}}">{{chatLoading ? '…' : '发送'}}</button>
+    </view>
+  </view>
+</view>

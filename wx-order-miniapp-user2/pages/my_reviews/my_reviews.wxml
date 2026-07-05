@@ -1,0 +1,25 @@
+<view class="page">
+  <view class="header-card">
+    <text class="header-title">⭐ 我的评价</text>
+    <text class="header-sub">共 {{reviews.length}} 条评价</text>
+  </view>
+
+  <view class="review-item" wx:for="{{reviews}}" wx:key="id">
+    <view class="review-top">
+      <view class="review-score">
+        <text class="star" wx:for="{{item.score}}">⭐</text>
+        <text class="star-off" wx:for="{{5 - item.score}}">☆</text>
+      </view>
+      <text class="review-time">{{item.createTime}}</text>
+    </view>
+    <text class="review-content" wx:if="{{item.content}}">{{item.content}}</text>
+    <text class="review-no-content" wx:else>用户未填写文字评价</text>
+    <view class="review-order">订单号：{{item.orderNo || item.orderId}}</view>
+  </view>
+
+  <view class="empty" wx:if="{{reviews.length === 0 && !loading}}">
+    <text class="empty-icon">📝</text>
+    <text class="empty-text">还没有评价过订单</text>
+    <text class="empty-sub">完成订单后可以评价哦～</text>
+  </view>
+</view>

@@ -31,6 +31,7 @@ Page({
           const list = Array.isArray(res.data.data) ? res.data.data.map(item => ({
             id: item.id,
             content: item.content,
+            replyContent: item.replyContent || '',
             createTime: item.createTime
           })) : []
           this.setData({ feedbacks: list })

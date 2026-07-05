@@ -9,10 +9,14 @@
     "pages/checkout/checkout",
     "pages/orders/orders",
     "pages/order_detail/order_detail",
-    "pages/order_comment/order_comment",
     "pages/profile/profile",
     "pages/feedback/feedback",
-    "pages/comment_detail/comment_detail"
+    "pages/nutrition/nutrition",
+    "pages/order_review/order_review",
+    "pages/my_reviews/my_reviews",
+    "pages/address/address",
+    "pages/edit_profile/edit_profile",
+    "pages/payments/payments"
   ],
   "window": {
     "navigationBarTitleText": "微信点餐系统",
@@ -28,22 +32,37 @@
     "list": [
       {
         "pagePath": "pages/home/home",
-        "text": "首页"
+        "text": "首页",
+        "iconPath": "images/tab/home.png",
+        "selectedIconPath": "images/tab/home-active.png"
       },
       {
         "pagePath": "pages/menu/menu",
-        "text": "菜单"
+        "text": "菜单",
+        "iconPath": "images/tab/menu.png",
+        "selectedIconPath": "images/tab/menu-active.png"
+      },
+      {
+        "pagePath": "pages/nutrition/nutrition",
+        "text": "AI",
+        "iconPath": "images/tab/ai.png",
+        "selectedIconPath": "images/tab/ai-active.png"
       },
       {
         "pagePath": "pages/orders/orders",
-        "text": "订单"
+        "text": "订单",
+        "iconPath": "images/tab/order.png",
+        "selectedIconPath": "images/tab/order-active.png"
       },
       {
         "pagePath": "pages/profile/profile",
-        "text": "我的"
+        "text": "我的",
+        "iconPath": "images/tab/me.png",
+        "selectedIconPath": "images/tab/me-active.png"
       }
     ]
   },
   "style": "v2",
-  "sitemapLocation": "sitemap.json"
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
 }

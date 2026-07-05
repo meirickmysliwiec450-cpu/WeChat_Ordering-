@@ -93,3 +93,17 @@
   color: #666666;
   font-size: 24rpx;
 }
+
+.review-action-btn {
+  background: linear-gradient(135deg, #ff9800, #f57c00) !important;
+  color: #fff !important;
+  border: none !important;
+  font-weight: 600;
+}
+
+.view-review-btn {
+  background: #fff !important;
+  color: #1989fa !important;
+  border: 2rpx solid #1989fa !important;
+  font-weight: 600;
+}

@@ -21,7 +21,7 @@
     "compileWorklet": false,
     "uglifyFileName": false,
     "uploadWithSourceMap": true,
-    "enhance": false,
+    "enhance": true,
     "packNpmManually": false,
     "packNpmRelationList": [],
     "minifyWXSS": true,
@@ -30,8 +30,8 @@
     "disableUseStrict": false,
     "useCompilerPlugins": false,
     "condition": false,
-    "swc": false,
-    "disableSWC": true,
+    "swc": true,
+    "disableSWC": false,
     "babelSetting": {
       "ignore": [],
       "disablePlugins": [],
@@ -40,13 +40,10 @@
   },
   "compileType": "miniprogram",
   "libVersion": "3.4.10",
-  "appid": "wx7489ea17d5eb4321",
+  "appid": "wx3f514348e74f0b29",
   "projectname": "wechat-ordering-miniapp",
-  "miniprogramRoot": "",
+  "miniprogramRoot": "./",
   "condition": {},
   "simulatorPluginLibVersion": {},
-  "editorSetting": {
-    "tabIndent": "insertSpaces",
-    "tabSize": 2
-  }
+  "editorSetting": {}
 }

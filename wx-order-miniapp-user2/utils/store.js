@@ -9,7 +9,9 @@ function setDiningType(type) {
 }
 
 function getDiningTypeText(type = getDiningType()) {
-  return type === 'takeout' ? '外送' : '堂食'
+  if (type === 'takeout') return '外送'
+  if (type === 'pickup') return '自取'
+  return '堂食'
 }
 
 function getCart() {
@@ -38,6 +40,7 @@ function addToCart(dishObj, count = 1) {
       id: dishObj.id,
       name: dishObj.name,
       price: dishObj.price,
+      image: dishObj.image || '',
       count,
       imageColor: dishObj.imageColor
     })
@@ -73,7 +76,7 @@ function createOrder(data) {
   const orders = wx.getStorageSync('orders') || []
   const now = new Date()
   const order = Object.assign({
-    id: 'O' + now.getTime(),
+    id: '' + now.getTime(),
     createTime: formatTime(now),
     status: 'paid',
     statusText: '已支付'

@@ -1,20 +1,14 @@
 <view class="dish card" bindtap="onDetail">
-  <view class="dish-img" style="background: {{dish.imageUrl ? 'none' : dish.imageColor}};">
-    <image wx:if="{{dish.imageUrl}}" class="dish-real-img" src="{{dish.imageUrl}}" mode="aspectFill" binderror="onImgError"></image>
-    <text wx:else>{{dish.label}}</text>
-  </view>
+  <image class="dish-img" src="{{dish.image || dish.imageUrl}}" mode="aspectFill" lazy-load binderror="onImgError" />
   <view class="dish-info">
-    <view class="between">
-      <text class="dish-name">{{dish.name}}</text>
-      <text class="tag" wx:if="{{dish.label}}">{{dish.label}}</text>
-    </view>
-    <text class="dish-desc">{{dish.desc}}</text>
-    <view class="between dish-bottom">
-      <view>
-        <text class="price">￥{{dish.price}}</text>
-        <text class="muted" wx:if="{{dish.sales}}"> 已售{{dish.sales}}</text>
+    <text class="dish-name">{{dish.dishName || dish.name}}</text>
+    <text class="dish-desc" wx:if="{{dish.description || dish.desc}}">{{dish.description || dish.desc}}</text>
+    <view class="dish-bottom">
+      <view class="dish-left">
+        <text class="price">¥{{dish.price}}</text>
+        <text class="sales">月售{{dish.sales || 0}}</text>
       </view>
-      <button class="add-btn" catchtap="onAdd">加入</button>
+      <view class="add-btn" catchtap="onAdd">＋</view>
     </view>
   </view>
 </view>
