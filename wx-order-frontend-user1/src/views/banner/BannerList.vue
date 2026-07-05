@@ -49,10 +49,7 @@
         <el-form-item label="图片URL">
           <el-input v-model="form.imageUrl" placeholder="选择下方图片或手动输入URL" />
         </el-form-item>
-        <!-- 当前图片预览 -->
-        <el-form-item label="预览" v-if="form.imageUrl">
-          <el-image :src="form.imageUrl" style="width:200px;height:120px;border-radius:6px" fit="cover" />
-        </el-form-item>
+
         <!-- 从菜品库选择图片 -->
         <el-form-item label="菜品图片">
           <div class="image-picker">

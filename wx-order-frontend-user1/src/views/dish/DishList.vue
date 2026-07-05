@@ -58,9 +58,7 @@
         <el-form-item label="库存">
           <el-input-number v-model="form.stock" :min="0" />
         </el-form-item>
-        <el-form-item label="折扣">
-          <el-input v-model="form.discount" placeholder="如: 8折" />
-        </el-form-item>
+
         <el-form-item label="营养信息">
           <div style="margin-bottom:8px">
             <el-button size="small" type="success" @click="autoFillNutrition" :loading="nutriLoading" :disabled="!form.dishName">
@@ -69,20 +67,30 @@
             <span style="color:#909399;font-size:12px;margin-left:8px">根据菜品名称自动查询营养信息</span>
           </div>
           <el-row :gutter="12">
-            <el-col :span="12"><el-input-number v-model="form.calories" :min="0" placeholder="热量(千卡/100g)" controls-position="right" style="width:100%" /></el-col>
-            <el-col :span="12"><el-input-number v-model="form.protein" :precision="1" :min="0" placeholder="蛋白质(g/100g)" controls-position="right" style="width:100%" /></el-col>
+            <el-col :span="12">
+              <div style="font-size:12px;color:#606266;margin-bottom:4px">🔥 热量（千卡/100g）</div>
+              <el-input-number v-model="form.calories" :min="0" placeholder="输入热量值" controls-position="right" style="width:100%" />
+            </el-col>
+            <el-col :span="12">
+              <div style="font-size:12px;color:#606266;margin-bottom:4px">💪 蛋白质（g/100g）</div>
+              <el-input-number v-model="form.protein" :precision="1" :min="0" placeholder="输入蛋白质值" controls-position="right" style="width:100%" />
+            </el-col>
           </el-row>
           <el-row :gutter="12" style="margin-top:8px">
-            <el-col :span="12"><el-input-number v-model="form.fat" :precision="1" :min="0" placeholder="脂肪(g/100g)" controls-position="right" style="width:100%" /></el-col>
-            <el-col :span="12"><el-input-number v-model="form.carbs" :precision="1" :min="0" placeholder="碳水(g/100g)" controls-position="right" style="width:100%" /></el-col>
+            <el-col :span="12">
+              <div style="font-size:12px;color:#606266;margin-bottom:4px">🥑 脂肪（g/100g）</div>
+              <el-input-number v-model="form.fat" :precision="1" :min="0" placeholder="输入脂肪值" controls-position="right" style="width:100%" />
+            </el-col>
+            <el-col :span="12">
+              <div style="font-size:12px;color:#606266;margin-bottom:4px">🍞 碳水化合物（g/100g）</div>
+              <el-input-number v-model="form.carbs" :precision="1" :min="0" placeholder="输入碳水值" controls-position="right" style="width:100%" />
+            </el-col>
           </el-row>
         </el-form-item>
         <el-form-item label="图片URL">
           <el-input v-model="form.image" placeholder="选择下方图片或手动输入URL" />
         </el-form-item>
-        <el-form-item label="预览" v-if="form.image">
-          <el-image :src="form.image" style="width:200px;height:120px;border-radius:6px" fit="cover" />
-        </el-form-item>
+
         <el-form-item label="选择图片">
           <div class="image-picker">
             <div v-if="imageList.length === 0" style="color:#909399;font-size:13px;margin-bottom:8px">
