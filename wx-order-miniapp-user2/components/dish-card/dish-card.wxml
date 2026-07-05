@@ -2,7 +2,7 @@
   <image class="dish-img" src="{{dish.image || dish.imageUrl}}" mode="aspectFill" lazy-load binderror="onImgError" />
   <view class="dish-info">
     <text class="dish-name">{{dish.dishName || dish.name}}</text>
-    <text class="dish-desc" wx:if="{{dish.description || dish.desc}}">{{dish.description || dish.desc}}</text>
+    <text class="dish-desc" wx:if="{{dish.description}}">{{dish.description }}</text>
     <view class="dish-bottom">
       <view class="dish-left">
         <text class="price">¥{{dish.price}}</text>

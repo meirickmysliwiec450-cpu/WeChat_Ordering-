@@ -66,6 +66,7 @@ Page({
   addCart(e) {
     const item = e.currentTarget.dataset.item
     if (!getDiningType()) { wx.showToast({ title: '请先在首页选用餐方式', icon: 'none' }); return }
+    console.log(item)
     addToCart(item)
     this.refreshCart()
     wx.showToast({ title: '已加入', icon: 'success' })
@@ -83,6 +84,7 @@ Page({
 
   refreshCart() {
     const cart = getCart()
+    console.log(cart);
     this.setData({ cart, summary: getCartSummary(cart) })
   },
 

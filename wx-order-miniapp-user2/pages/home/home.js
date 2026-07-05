@@ -6,21 +6,78 @@ Page({
     shopName: '校园风味点餐',
     hotDishes: [],
     diningType: '',
+    // 今日推荐
+    recDishes: [],
+    recPeriod: '',
     diningTypeText: '未选择',
-    dishList: []
+    dishList: [],
   },
 
   onLoad() {
     this.setData({ shopName: getApp().globalData.shopName })
-  },
-
-  onShow() {
-    requireLogin()
-    this.refreshDiningType()
+    this.loadCachedOrFetch()
+    this.loadQuickDishes()
     this.fetchBanners()
     this.fetchDishes()
   },
 
+  onShow() {
+    this.refreshDiningType()
+    setTimeout(() => requireLogin(), 300)
+    setTimeout(()=>{
+      console.log("recDishes数组：", this.data.recDishes, "长度", this.data.recDishes.length)
+    }, 1000)
+  },
+
+  loadCachedOrFetch() {
+    const cache = wx.getStorageSync('ai_rec_cache')
+    if (cache && cache.time && (Date.now() - cache.time < 300000)) {
+      this.setData({ recDishes: cache.dishes, recPeriod: cache.period })
+      return
+    }
+    this.fetchRecommend()
+  },
+
+  // ========== 快速加载 ==========
+  loadQuickDishes() {
+    // 已有缓存直接显示，不用重新加载
+    if (this.data.recDishes.length > 0) return
+    const token = getToken()
+    wx.request({
+      url: buildUrl('/wx/dishes'),
+      method: 'GET',
+      header: { Authorization: `Bearer ${token}` },
+      success: res => {
+        if (res.data && res.data.code === 200) {
+          const dishes = res.data.data || []
+          const shuffled = dishes.sort(() => Math.random() - 0.5).slice(0, 6)
+          const quick = shuffled.map(d => ({
+            id: d.id, dishName: d.dishName, image: d.image,
+            price: d.price, categoryName: d.categoryId, reason: '👀 猜你喜欢'
+          }))
+          this.setData({ recDishes: quick, recPeriod: '为你精选' })
+        }
+      }
+    })
+  },
+  // ========== AI推荐（后台加载，替换快速结果） ==========
+  fetchRecommend() {
+    wx.request({
+      url: buildUrl('/wx/recommend'),
+      method: 'GET',
+      header: { Authorization: `Bearer ${getToken()}` },
+      success: res => {
+        if (res.data && res.data.code === 200) {
+          const d = res.data.data
+          if (d.dishes && d.dishes.length > 0) {
+            this.setData({ recDishes: d.dishes, recPeriod: d.period || '' })
+            // 缓存5分钟
+            wx.setStorageSync('ai_rec_cache', { dishes: d.dishes, period: d.period, time: Date.now() })
+          }
+        }
+      }
+    })
+  },
   // 轮播图：从 t_banner 读取，匹配对应菜品实现点击跳转
   fetchBanners() {
     const token = getToken()

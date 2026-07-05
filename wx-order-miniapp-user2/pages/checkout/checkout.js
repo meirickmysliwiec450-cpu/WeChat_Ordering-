@@ -1,4 +1,4 @@
-const { getCart, getCartSummary, clearCart, createOrder, getDiningType, getDiningTypeText, setDiningType } = require('../../utils/store')
+const { getCart, getCartSummary, clearCart, createOrder, getDiningType,getDiningTypeText, setDiningType } = require('../../utils/store')
 const { getToken, requireLogin } = require('../../utils/auth')
 
 Page({
@@ -140,6 +140,7 @@ Page({
   },
 
   submitOrder() {
+    /* 生成订单信息 */
     if (this.data.submitting) return
 
     if (this.data.diningType === 'takeout' && !this.data.selectedAddr) {
@@ -150,56 +151,14 @@ Page({
       wx.showToast({ title: '请输入正确的11位手机号', icon: 'none' })
       return
     }
-
-    wx.showModal({
-      title: '确认结算',
-      content: `本单需支付 ￥${this.data.summary.totalPrice}，是否继续？`,
-      success: res => {
-        if (!res.confirm) return
-        this.createOrderByApi()
-      }
-    })
+    this.createOrderByApi()
   },
-
-  createLocalOrder(payload) {
-    createOrder(Object.assign({}, payload, {
-      status: 'paid',
-      statusText: '已支付',
-      feedback: null
-    }))
-    clearCart()
-    wx.hideLoading()
-    this.setData({ submitting: false })
-    wx.showToast({ title: '已本地保存订单', icon: 'success' })
-    setTimeout(() => wx.switchTab({ url: '/pages/orders/orders' }), 600)
-  },
-
   createOrderByApi() {
-    console.log('========== 开始提交订单 ==========')
-    
     const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
     const payload = this.buildOrderPayload()
     const fullUrl = `${baseUrl}/wx/orders`
-    
-    console.log('完整请求地址:', fullUrl)
-    console.log('请求参数:', payload)
-    console.log('Token:', getToken())
-    
-    if (!baseUrl) {
-      console.error('❌ baseUrl 未配置！')
-      wx.showToast({ title: '请先配置后端地址', icon: 'none' })
-      return
-    }
-    
-    if (!payload.items || payload.items.length === 0) {
-      console.error('❌ 购物车为空！')
-      wx.showToast({ title: '购物车为空', icon: 'none' })
-      return
-    }
-
     this.setData({ submitting: true })
     wx.showLoading({ title: '结算中' })
-
     wx.request({
       url: fullUrl,
       method: 'POST',
@@ -209,34 +168,20 @@ Page({
       },
       data: payload,
       success: res => {
-        console.log('✅ 请求成功响应:', res)
-        console.log('响应状态码:', res.statusCode)
-        console.log('响应数据:', res.data)
-        
         const httpOk = res.statusCode >= 200 && res.statusCode < 300
         const bizOk = res.data && res.data.code === 200
         if (!httpOk || !bizOk) {
-          console.error('❌ 订单提交失败，HTTP=' + res.statusCode + ', code=' + (res.data?.code))
           wx.hideLoading()
           this.setData({ submitting: false })
-          // 显示具体错误信息
           wx.showToast({ title: res.data?.message || '订单提交失败', icon: 'none', duration: 2000 })
-          // 仍然保存到本地，数据不丢失
-          this.createLocalOrder(payload)
-          setTimeout(() => wx.switchTab({ url: '/pages/orders/orders' }), 800)
           return
         }
-
+        const orderId = res.data.data.orderId
         clearCart()
         wx.hideLoading()
-        this.setData({ submitting: false })
-        wx.showToast({ title: '结算成功，订单已提交', icon: 'success' })
-        setTimeout(() => wx.switchTab({ url: '/pages/orders/orders' }), 600)
+        this.payOrder(orderId)
       },
       fail: (err) => {
-        console.error('❌ 请求失败:', err)
-        console.error('错误详情:', JSON.stringify(err))
-        
         wx.hideLoading()
         this.setData({ submitting: false })
         
@@ -245,11 +190,53 @@ Page({
           errorMsg += ': ' + err.errMsg
         }
         wx.showToast({ title: errorMsg, icon: 'none', duration: 3000 })
-        
-        // 尝试使用本地订单（临时方案）
-        console.log('使用本地保存订单...')
-        this.createLocalOrder(payload)
       }
     })
-  }
+  },
+  /* 生成支付信息 */
+  payOrder(param) {
+    console.log(param)
+    let orderId = ''
+    // 判断传入的是点击事件还是直接订单ID
+    if (param && param.currentTarget) {
+      // WXML按钮点击触发，从dataset拿id
+      orderId = String(param.currentTarget.dataset.id || '').replace(/\D/g, '')
+    } else {
+      // 接口创建订单后主动调用，直接传id
+      orderId = String(param).replace(/\D/g, '')
+    }
+  
+    if (!orderId) {
+      wx.showToast({ title: '订单ID缺失，无法支付', icon: 'none' })
+      return
+    }
+  
+    wx.showModal({
+      title: '确认支付',
+      content: '确认支付该订单？',
+      success: res => {
+        if (!res.confirm) {
+          this.setData({ submitting: false })
+          return
+        }
+        const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+        wx.request({
+          url: `${baseUrl}/wx/orders/${orderId}`,
+          method: 'PUT',
+          header: { 'content-type': 'application/json', Authorization: `Bearer ${getToken()}` },
+          data: { orderStatus: 1 },
+          success: (apiRes) => {
+            this.setData({ submitting: false })
+            if (apiRes.data?.code === 200) {
+              wx.showToast({ title: '支付成功', icon: 'success' })
+              setTimeout(() => wx.switchTab({ url: '/pages/orders/orders' }), 600)
+            } else {
+              wx.showToast({ title: apiRes.data?.message || '支付失败', icon: 'none' })
+            }
+          },
+          fail: () => wx.showToast({ title: '网络异常', icon: 'none' })
+        })
+      }
+    })
+  },
 })

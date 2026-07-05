@@ -28,6 +28,37 @@
 .opt-desc { font-size: 20rpx; color: #999; display: block; margin-top: 2rpx; }
 .start-btn { width: 100%; margin-top: 20rpx; height: 80rpx; line-height: 80rpx; font-size: 30rpx; font-weight: 700; color: #fff; background: linear-gradient(135deg, #c01818, #e04030); border-radius: 40rpx; border: none; }
 .start-btn[disabled] { background: #ddd; color: #999; }
+/* ========== 推荐 ========== */
+.scroll-area { flex: 1; height: calc(100vh - 800rpx);}
+.sec-title { display: flex; align-items: center; padding: 24rpx 20rpx 12rpx; font-size: 28rpx; font-weight: 700; color: #333; }
+.sec-dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #e26a2c; margin-right: 10rpx; }
 
+/* 推荐横滑卡片 */
+.rec-row { white-space: nowrap; padding: 0 12rpx 8rpx; }
+.dish-card {
+  display: inline-block; width: 420rpx; margin: 0 8rpx; background: #fff;
+  border-radius: 20rpx; overflow: hidden; box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06);
+  vertical-align: top; transition: transform 0.2s;
+}
+.dish-card:active { transform: scale(0.97); }
+.dish-img-wrap { position: relative; }
+.dish-img { width: 100%; height: 210rpx; }
+.dish-tag {
+  position: absolute; top: 14rpx; left: 14rpx;
+  font-size: 20rpx; color: #fff; background: rgba(0,0,0,0.45);
+  padding: 4rpx 14rpx; border-radius: 16rpx;
+}
+.dish-info { padding: 16rpx 18rpx 18rpx; white-space: normal; }
+.dish-name { font-size: 28rpx; font-weight: 700; color: #222; display: block; }
+.dish-reason { font-size: 22rpx; color: #999; display: block; margin-top: 6rpx; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.dish-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 14rpx; }
+.dish-price { font-size: 30rpx; font-weight: 800; color: #e26a2c; }
+
+.pill-btn {
+  background: linear-gradient(135deg, #c01818, #e04030); color: #fff;
+  font-size: 22rpx; padding: 8rpx 22rpx; border-radius: 30rpx;
+  box-shadow: 0 2rpx 8rpx rgba(192,24,24,0.25); transition: all 0.15s;
+}
+.pill-btn:active { transform: scale(0.94); opacity: 0.9; }
 /* ========== 热销 ========== */
 .section-title { font-size: 30rpx; font-weight: 700; padding: 30rpx 24rpx 10rpx; color: #333; }

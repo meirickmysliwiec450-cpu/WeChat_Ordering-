@@ -41,6 +41,50 @@
     <button class="start-btn" bindtap="startOrder" disabled="{{!diningType}}">{{diningType ? '开始点餐' : '请先选择用餐方式'}}</button>
   </view>
 
+  <scroll-view class="scroll-area" scroll-y="true" enhanced show-scrollbar="{{false}}">
+      <!-- 今日推荐 -->
+      <view class="sec-title" wx:if="{{recDishes.length > 0}}">
+        <text class="sec-dot"></text>
+        <text>{{recPeriod}}推荐</text>
+      </view>
+      <scroll-view class="rec-row" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{recDishes.length > 0}}">
+        <view class="dish-card" wx:for="{{recDishes}}" wx:key="id" bindtap="goDishDetail" data-id="{{item.id}}">
+          <view class="dish-img-wrap">
+            <image class="dish-img" src="{{item.image}}" mode="aspectFill" />
+            <view class="dish-tag" wx:if="{{item.categoryName}}">{{item.categoryName}}</view>
+          </view>
+          <view class="dish-info">
+            <text class="dish-name">{{item.dishName}}</text>
+            <text class="dish-reason">{{item.reason}}</text>
+            <view class="dish-foot">
+              <text class="dish-price">¥{{item.price}}</text>
+              <view class="pill-btn" catchtap="addCartFromRec" data-id="{{item.id}}">＋ 加购</view>
+            </view>
+          </view>
+        </view>
+      </scroll-view>
+
+      <!-- 偏好搜索结果 -->
+      <view class="sec-title" wx:if="{{chatDishes.length > 0}}">
+        <text class="sec-dot"></text>
+        <text>根据「{{lastQuery}}」为你找到</text>
+      </view>
+      <view class="result-item" wx:for="{{chatDishes}}" wx:key="id" bindtap="goDishDetail" data-id="{{item.id}}">
+        <image class="result-img" src="{{item.image}}" mode="aspectFill" />
+        <view class="result-body">
+          <view class="result-top">
+            <text class="result-name">{{item.dishName}}</text>
+            <text class="result-tag" wx:if="{{item.categoryName}}">{{item.categoryName}}</text>
+          </view>
+          <text class="result-reason">{{item.reason}}</text>
+          <view class="result-foot">
+            <text class="result-price">¥{{item.price}}</text>
+            <view class="pill-btn" catchtap="addCartFromRec" data-id="{{item.id}}">＋ 加购</view>
+          </view>
+        </view>
+      </view>
+      <view style="height:16rpx"></view>
+    </scroll-view>
   <!-- 热销（按真实销量排序） -->
   <view class="section-title">🔥 热销菜品</view>
   <dish-card wx:for="{{hotDishes}}" wx:key="id" dish="{{item}}" bind:add="addCart" />

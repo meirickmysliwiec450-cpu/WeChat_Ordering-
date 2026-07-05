@@ -1,11 +1,76 @@
-.dish { display: flex; margin: 0 20rpx 14rpx; background: #fff; border-radius: 16rpx; overflow: hidden; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04); }
+.dish { 
+  display: flex; 
+  margin: 0 20rpx 14rpx; 
+  background: #fff; 
+  border-radius: 16rpx; 
+  overflow: hidden; 
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04); 
+}
 .dish:active { opacity: 0.95; }
-.dish-img { width: 200rpx; height: 200rpx; flex-shrink: 0; background: #f0f0f0; }
-.dish-info { flex: 1; padding: 18rpx 20rpx; display: flex; flex-direction: column; justify-content: space-between; }
-.dish-name { font-size: 29rpx; font-weight: 700; color: #222; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dish-desc { font-size: 23rpx; color: #aaa; display: block; margin-top: 4rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dish-bottom { display: flex; justify-content: space-between; align-items: center; margin-top: 6rpx; }
-.dish-left { display: flex; align-items: baseline; gap: 14rpx; }
-.price { font-size: 30rpx; font-weight: 800; color: #e04030; }
-.sales { font-size: 22rpx; color: #bbb; }
-.add-btn { width: 48rpx; height: 48rpx; display: flex; align-items: center; justify-content: center; font-size: 28rpx; color: #fff; background: #c01818; border-radius: 50%; box-shadow: 0 2rpx 8rpx rgba(192,24,24,0.3); }
+.dish-img { 
+  width: 200rpx; 
+  height: 200rpx; 
+  flex-shrink: 0; /* 图片固定宽，不压缩 */
+  background: #f0f0f0; 
+}
+.dish-info { 
+  flex: 1; 
+  padding: 18rpx 20rpx; 
+  display: flex; 
+  flex-direction: column; 
+  justify-content: space-between; 
+  min-width: 0; /* 关键：开启子元素文本省略压缩能力 */
+}
+.dish-name { 
+  font-size: 29rpx; 
+  font-weight: 700; 
+  color: #222; 
+  display: block; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+}
+.dish-desc { 
+  font-size: 23rpx; 
+  color: #aaa; 
+  display: block; 
+  margin-top: 4rpx; 
+  overflow: hidden; 
+  text-overflow: ellipsis; 
+  white-space: nowrap; 
+}
+.dish-bottom { 
+  display: flex; 
+  justify-content: space-between; 
+  align-items: center; 
+  margin-top: 6rpx; 
+  gap: 16rpx; /* 左右两块强制留空隙，避免挤压 */
+}
+.dish-left { 
+  display: flex; 
+  align-items: baseline; 
+  gap: 14rpx; 
+  min-width: 0; /* 价格文字过长时压缩省略 */
+}
+.price { 
+  font-size: 30rpx; 
+  font-weight: 800; 
+  color: #e04030; 
+}
+.sales { 
+  font-size: 22rpx; 
+  color: #bbb; 
+}
+.add-btn { 
+  width: 48rpx; 
+  height: 48rpx; 
+  flex-shrink: 0; /* 核心：按钮固定尺寸，绝不被压缩挤出去 */
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  font-size: 28rpx; 
+  color: #fff; 
+  background: #c01818; 
+  border-radius: 50%; 
+  box-shadow: 0 2rpx 8rpx rgba(192,24,24,0.3); 
+}

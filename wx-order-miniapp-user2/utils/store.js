@@ -38,7 +38,7 @@ function addToCart(dishObj, count = 1) {
   } else {
     cart.push({
       id: dishObj.id,
-      name: dishObj.name,
+      name: dishObj.dishName,
       price: dishObj.price,
       image: dishObj.image || '',
       count,

@@ -27,7 +27,6 @@
         <image class="dish-img" src="{{item.image}}" mode="aspectFill" lazy-load />
         <view class="dish-right">
           <text class="dish-name">{{item.dishName}}</text>
-          <text class="dish-desc" wx:if="{{item.description}}">{{item.description}}</text>
           <view class="dish-meta">
             <text class="dish-sales" wx:if="{{item.sales}}">月售{{item.sales}}</text>
             <text class="dish-stock" wx:if="{{item.stock > 0}}">库存{{item.stock}}</text>
