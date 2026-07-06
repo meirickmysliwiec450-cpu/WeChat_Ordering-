@@ -76,7 +76,13 @@
   border: 1rpx solid rgba(192,24,24,0.15);
 }
 .chip:active { background: #c01818; color: #fff; }
-.input-row { display: flex; align-items: center; padding: 12rpx 16rpx 12rpx; padding-bottom: calc(12rpx + env(safe-area-inset-bottom)); }
+.input-row 
+{ 
+  display: flex; 
+  align-items: center; 
+  padding: 12rpx 16rpx 12rpx; 
+  /* padding-bottom: calc(12rpx + env(safe-area-inset-bottom));  */
+}
 .pref-input { flex: 1; height: 68rpx; background: #f8f8f8; border-radius: 34rpx; padding: 0 22rpx; font-size: 26rpx; }
 .voice-btn { font-size: 36rpx; margin-left: 14rpx; width: 68rpx; height: 68rpx; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #f0f0f0; }
 .voice-btn.muted { opacity: 0.5; }
@@ -106,7 +112,28 @@
 .bubble-user text { color: #fff; font-size: 27rpx; line-height: 1.6; }
 .bubble-ai text { color: #333; font-size: 27rpx; line-height: 1.6; }
 
-.input-bar { display: flex; align-items: center; padding: 12rpx 14rpx; padding-bottom: calc(12rpx + env(safe-area-inset-bottom)); background: #fff; border-top: 1rpx solid #f0f0f0; }
+.input-bar 
+{ 
+  display: flex; 
+  align-items: center; 
+  padding: 12rpx 14rpx; 
+  /* padding-bottom: calc(12rpx + env(safe-area-inset-bottom));  */
+  background: #fff; 
+  border-top: 1rpx solid #f0f0f0; 
+}
 .msg-input { flex: 1; height: 68rpx; background: #f8f8f8; border-radius: 34rpx; padding: 0 22rpx; font-size: 26rpx; }
-.pill-send { margin-left: 12rpx; height: 68rpx; line-height: 68rpx; padding: 0 30rpx; font-size: 26rpx; font-weight: 600; color: #fff; background: linear-gradient(135deg, #c01818, #e04030); border-radius: 34rpx; border: none; box-shadow: 0 2rpx 10rpx rgba(192,24,24,0.25); }
+.pill-send 
+{ 
+  margin-left: 12rpx; 
+  height: 68rpx; 
+  line-height: 68rpx; 
+  padding: 0 30rpx; 
+  font-size: 26rpx; 
+  font-weight: 500; 
+  color: #fff; 
+  background: linear-gradient(135deg, #c01818, #e04030); 
+  border-radius: 34rpx; 
+  border: none; 
+  box-shadow: 0 2rpx 10rpx rgba(192,24,24,0.25); 
+}
 .pill-send[disabled] { background: #e0e0e0; box-shadow: none; color: #aaa; }

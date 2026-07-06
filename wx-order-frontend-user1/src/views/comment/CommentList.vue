@@ -3,8 +3,17 @@
     <h3>评价管理</h3>
     <el-card>
       <div class="toolbar">
-        <el-input v-model="filterOrderId" placeholder="按订单号筛选" clearable @clear="fetchData" style="width:220px" />
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="YYYY-MM-DD"
+          style="width:300px"
+        />
         <el-button type="primary" @click="fetchData">查询</el-button>
+        <el-button @click="dateRange = null; fetchData()">重置</el-button>
       </div>
       <el-table :data="comments" stripe v-loading="loading">
         <el-table-column prop="id" label="ID" width="70" />
@@ -52,16 +61,20 @@ const loading = ref(false)
 const page = ref(1)
 const pageSize = ref(10)
 const total = ref(0)
-const filterOrderId = ref('')
+const dateRange = ref(null)
 
 async function fetchData() {
   loading.value = true
   try {
-    const res = await getComments({
+    const params = {
       page: page.value,
-      pageSize: pageSize.value,
-      orderId: filterOrderId.value || undefined
-    })
+      pageSize: pageSize.value
+    }
+    if (dateRange.value && dateRange.value.length === 2) {
+      params.startDate = dateRange.value[0]
+      params.endDate = dateRange.value[1]
+    }
+    const res = await getComments(params)
     comments.value = res.data.list
     total.value = res.data.total
   } finally { loading.value = false }

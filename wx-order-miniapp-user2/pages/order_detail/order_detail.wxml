@@ -71,7 +71,7 @@
     <!-- 已完成订单的操作按钮 -->
     <block wx:if="{{order.status === 'completed'}}">
       <button wx:if="{{!hasReviewed}}" class="btn-primary review-btn" bindtap="goReview">⭐ 订单评价</button>
-      <button wx:if="{{hasReviewed}}" class="review-btn review-update-btn" bindtap="goReview">✏️ 追加评价</button>
+      <button wx:if="{{hasReviewed}}" class="review-btn review-update-btn" bindtap="goReview">✏️ 修改评价</button>
     </block>
   </block>
 </view>

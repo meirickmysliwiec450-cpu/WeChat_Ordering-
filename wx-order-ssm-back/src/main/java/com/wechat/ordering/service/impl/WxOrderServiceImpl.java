@@ -15,18 +15,26 @@ import java.util.*;
 @Service
 public class WxOrderServiceImpl implements WxOrderService {
 
-    @Autowired private OrderMapper orderMapper;
-    @Autowired private OrderDetailMapper orderDetailMapper;
-    @Autowired private CartMapper cartMapper;
-    @Autowired private DishMapper dishMapper;
-    @Autowired private AddressMapper addressMapper;
-    @Autowired private PaymentMapper paymentMapper;
+    @Autowired
+    private OrderMapper orderMapper;
+    @Autowired
+    private OrderDetailMapper orderDetailMapper;
+    @Autowired
+    private CartMapper cartMapper;
+    @Autowired
+    private DishMapper dishMapper;
+    @Autowired
+    private AddressMapper addressMapper;
+    @Autowired
+    private PaymentMapper paymentMapper;
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     @Transactional
     public Map<String, Object> submit(Long userId, Long addressId, Map<String, Object> params) {
         System.out.println("  [WxOrderService] 开始处理订单，用户ID：" + userId);
-        
+
         // 1. 从前端参数解析基础字段
         String remark = (String) params.get("remark");
         String diningType = (String) params.get("diningType");
@@ -85,16 +93,25 @@ public class WxOrderServiceImpl implements WxOrderService {
                 .userId(userId)
                 .totalAmount(totalAmount)
                 .payAmount(totalAmount)
-                .payStatus(0)         // 未支付
-                .orderStatus(3)       // 待支付（3=待支付 1=已支付 2=已完成 0=已取消）
+                .payStatus(0) // 未支付
+                .orderStatus(3) // 待支付（3=待支付 1=已支付 2=已完成 0=已取消）
                 .remark(remark)
                 .addressId(addressId) // 堂食为null，外送为真实ID
                 .createTime(LocalDateTime.now());
 
-        // 外送填充收货人、电话；堂食留空
+        String receiver = (String) params.get("receiver");
+        String phone = (String) params.get("phone");
+
         if ("takeout".equals(diningType) && addr != null) {
-            orderBuilder.receiver(addr.getReceiver())
-                    .receiverPhone(addr.getPhone());
+            orderBuilder.receiver(receiver != null && !receiver.trim().isEmpty() ? receiver.trim() : addr.getReceiver())
+                    .receiverPhone(phone != null && !phone.trim().isEmpty() ? phone.trim() : addr.getPhone());
+        } else {
+            User user = userMapper.selectById(userId);
+            if (user != null) {
+                orderBuilder
+                        .receiver(receiver != null && !receiver.trim().isEmpty() ? receiver.trim() : user.getNickName())
+                        .receiverPhone(phone != null && !phone.trim().isEmpty() ? phone.trim() : user.getPhone());
+            }
         }
 
         Order order = orderBuilder.build();
@@ -149,7 +166,7 @@ public class WxOrderServiceImpl implements WxOrderService {
     public Map<String, Object> list(Long userId, Integer page, Integer pageSize, Integer status) {
         System.out.println("  [WxOrderService] 开始查询订单列表，用户ID：" + userId);
         System.out.println("  [WxOrderService] 分页参数：page=" + page + ", pageSize=" + pageSize + ", status=" + status);
-        
+
         List<Order> all = orderMapper.selectByUserId(userId);
         System.out.println("  [WxOrderService] 数据库查询到订单数量：" + all.size());
         if (status != null) {
@@ -179,11 +196,11 @@ public class WxOrderServiceImpl implements WxOrderService {
             orderMap.put("receiver", order.getReceiver());
             orderMap.put("receiverPhone", order.getReceiverPhone());
             orderMap.put("createTime", order.getCreateTime());
-            
+
             // 加载订单详情
             List<OrderDetail> details = orderDetailMapper.selectByOrderId(order.getId());
             orderMap.put("items", details);
-            
+
             orderListWithDetails.add(orderMap);
         }
 
@@ -199,7 +216,8 @@ public class WxOrderServiceImpl implements WxOrderService {
     @Override
     public Map<String, Object> detail(Long userId, Long orderId) {
         Order order = orderMapper.selectById(orderId);
-        if (order == null || !order.getUserId().equals(userId)) throw new RuntimeException("订单不存在");
+        if (order == null || !order.getUserId().equals(userId))
+            throw new RuntimeException("订单不存在");
         List<OrderDetail> details = orderDetailMapper.selectByOrderId(orderId);
 
         Map<String, Object> result = new HashMap<>();
@@ -211,8 +229,10 @@ public class WxOrderServiceImpl implements WxOrderService {
     @Override
     public void cancel(Long userId, Long orderId) {
         Order order = orderMapper.selectById(orderId);
-        if (order == null || !order.getUserId().equals(userId)) throw new RuntimeException("订单不存在");
-        if (order.getOrderStatus() != 3) throw new RuntimeException("只有待支付状态的订单才能取消");
+        if (order == null || !order.getUserId().equals(userId))
+            throw new RuntimeException("订单不存在");
+        if (order.getOrderStatus() != 3)
+            throw new RuntimeException("只有待支付状态的订单才能取消");
         order.setOrderStatus(0); // 已取消
         orderMapper.update(order);
     }
@@ -238,10 +258,12 @@ public class WxOrderServiceImpl implements WxOrderService {
             boolean allowChange = false;
             switch (currentStatus) {
                 case 3: // 待支付：可改为 已支付1 / 已取消0
-                    if (targetStatus == 1 || targetStatus == 0) allowChange = true;
+                    if (targetStatus == 1 || targetStatus == 0)
+                        allowChange = true;
                     break;
                 case 1: // 已支付：只能改为已完成2，不能取消
-                    if (targetStatus == 2) allowChange = true;
+                    if (targetStatus == 2)
+                        allowChange = true;
                     break;
                 case 2: // 已完成 不可修改
                 case 0: // 已取消 不可修改

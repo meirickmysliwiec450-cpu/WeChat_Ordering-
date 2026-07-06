@@ -26,7 +26,19 @@
 .opt-icon { font-size: 40rpx; display: block; }
 .opt-name { font-size: 26rpx; font-weight: 700; color: #333; display: block; margin-top: 6rpx; }
 .opt-desc { font-size: 20rpx; color: #999; display: block; margin-top: 2rpx; }
-.start-btn { width: 100%; margin-top: 20rpx; height: 80rpx; line-height: 80rpx; font-size: 30rpx; font-weight: 700; color: #fff; background: linear-gradient(135deg, #c01818, #e04030); border-radius: 40rpx; border: none; }
+.start-btn 
+{ 
+  width: 100%; 
+  margin-top: 20rpx; 
+  height: 80rpx; 
+  line-height: 50rpx; 
+  font-size: 30rpx; 
+  font-weight: 700; 
+  color: #fff; 
+  background: linear-gradient(135deg, #c01818, #e04030); 
+  border-radius: 40rpx; 
+  border: none; 
+}
 .start-btn[disabled] { background: #ddd; color: #999; }
 /* ========== 推荐 ========== */
 .scroll-area { flex: 1; height: calc(100vh - 800rpx);}

@@ -83,7 +83,7 @@
       </view>
       <view class="input-row">
         <input class="pref-input" value="{{prefText}}" placeholder="输入口味偏好，或点击上方快捷提问…" bindinput="onPrefInput" confirm-type="send" bindconfirm="sendPreference" />
-        <button class="pill-send" bindtap="sendPreference" disabled="{{prefText === '' || prefLoading}}">{{prefLoading ? '…' : '发送'}}</button>
+        <button size="mini" class="pill-send" bindtap="sendPreference" disabled="{{prefText === '' || prefLoading}}">{{prefLoading ? '…' : '发送'}}</button>
       </view>
     </view>
   </view>
@@ -118,7 +118,7 @@
     </scroll-view>
     <view class="input-bar">
       <input class="msg-input" value="{{inputText}}" placeholder="输入营养问题…" bindinput="onInput" confirm-type="send" bindconfirm="sendMessage" />
-      <button class="pill-send" bindtap="sendMessage" disabled="{{inputText === '' || chatLoading}}">{{chatLoading ? '…' : '发送'}}</button>
+      <button size="mini" class="pill-send" bindtap="sendMessage" disabled="{{inputText === '' || chatLoading}}">{{chatLoading ? '…' : '发送'}}</button>
     </view>
   </view>
 </view>

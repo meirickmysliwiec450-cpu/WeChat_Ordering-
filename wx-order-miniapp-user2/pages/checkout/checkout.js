@@ -10,6 +10,7 @@ Page({
     address: '',
     tableInfo: '',
     phone: '',
+    receiver: '',
     remark: '',
     submitting: false,
     addressList: [],
@@ -42,10 +43,40 @@ Page({
       cart,
       summary: getCartSummary(cart),
       address: profile.address || this.data.address,
-      phone: profile.phone || ''
+      receiver: profile.nickname,
+
     })
+    this.loadUserPhone()
     if (diningType === 'takeout') this.loadAddresses()
   },
+
+  loadUserPhone() {
+    const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
+    const profile = wx.getStorageSync('profile') || {}
+    const userInfo = wx.getStorageSync('userInfo') || {}
+    
+    let defaultPhone = userInfo.phone || profile.phone || ''
+    
+    if (baseUrl && !defaultPhone) {
+      wx.request({
+        url: `${baseUrl}/wx/user/info`,
+        method: 'GET',
+        header: { Authorization: `Bearer ${getToken()}` },
+        success: res => {
+          if (res.data?.code === 200 && res.data.data?.phone) {
+            defaultPhone = res.data.data.phone
+          }
+          this.setData({ phone: defaultPhone })
+        },
+        fail: () => {
+          this.setData({ phone: defaultPhone })
+        }
+      })
+    } else {
+      this.setData({ phone: defaultPhone })
+    }
+  },
+
 
   loadAddresses() {
     const baseUrl = (getApp().globalData.baseUrl || '').replace(/\/$/, '')
@@ -114,10 +145,13 @@ Page({
 
   buildOrderPayload() {
     const data = this.data
+    console.log(data)
     const payload = {
       diningType: data.diningType,
       diningTypeText: getDiningTypeText(data.diningType),
       remark: data.remark,
+      phone:data.phone,
+      receiver: data.receiver,
       address: data.diningType === 'takeout' ? data.address : '',
       tableInfo: data.diningType === 'dineIn' ? data.tableInfo : '',
       totalCount: data.summary.totalCount,

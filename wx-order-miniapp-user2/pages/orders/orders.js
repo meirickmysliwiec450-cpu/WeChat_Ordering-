@@ -77,11 +77,11 @@ Page({
       status: STATUS_MAP[os] || 'pending',
       statusText: STATUS_TEXT[os] || '未知',
       diningType: o.receiver ? 'takeout' : 'dineIn',
-      diningTypeText: o.receiver ? '外送' : '堂食',
+      diningTypeText: o.address ? '外送' : '堂食',
       items,
       totalCount: items.reduce((s, d) => s + d.count, 0),
       totalPrice: o.payAmount || o.totalAmount || 0,
-      address: o.receiver || '',
+      address: o.address || '',
       remark: o.remark || ''
     }
   },

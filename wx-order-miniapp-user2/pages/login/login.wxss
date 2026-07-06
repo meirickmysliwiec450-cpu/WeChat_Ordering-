@@ -49,7 +49,7 @@
 
 .login-btn {
   height: 88rpx;
-  line-height: 88rpx;
+  line-height: 58rpx;
   border-radius: 999rpx;
   background: #c01818;
   color: #ffffff;

@@ -26,8 +26,14 @@
 .form-input { flex: 1; font-size: 28rpx; text-align: right; color: #333; }
 
 .save-btn {
-  width: calc(100% - 48rpx); margin: 30rpx 24rpx;
-  height: 88rpx; line-height: 88rpx; font-size: 30rpx; font-weight: 700;
-  color: #fff; background: linear-gradient(135deg, #c01818, #e04030);
-  border-radius: 44rpx; border: none;
+  width: calc(100% - 48rpx); 
+  margin: 30rpx 24rpx;
+  height: 88rpx; 
+  line-height: 68rpx; 
+  font-size: 30rpx; 
+  font-weight: 700;
+  color: #fff; 
+  background: linear-gradient(135deg, #c01818, #e04030);
+  border-radius: 44rpx; 
+  border: none;
 }

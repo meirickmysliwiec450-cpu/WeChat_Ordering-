@@ -27,15 +27,15 @@ public class WxOrderController {
     public Result<Map<String, Object>> submit(HttpServletRequest request, @RequestBody Map<String, Object> params) {
         System.out.println("========== 收到订单提交请求 ==========");
         System.out.println("请求参数：" + params);
-        
+
         Long userId = (Long) request.getAttribute("userId");
         System.out.println("当前登录用户ID：" + userId);
-        
+
         if (userId == null) {
             System.out.println("❌ 用户未登录！");
             return Result.error("请先登录");
         }
-        
+
         String diningType = (String) params.get("diningType");
         Long addressId = null;
         Object aidObj = params.get("addressId");
@@ -48,19 +48,21 @@ public class WxOrderController {
             if (aidObj != null && ((Number) aidObj).longValue() > 0) {
                 addressId = ((Number) aidObj).longValue();
             } else {
-                // 用户手动填了地址文字，自动创建地址记录
                 String addressText = (String) params.get("address");
+                String receiver = (String) params.get("receiver");
+                String phone = (String) params.get("phone");
+
                 if (addressText != null && !addressText.trim().isEmpty()) {
                     Address newAddr = new Address();
                     newAddr.setUserId(userId);
-                    newAddr.setReceiver("用户");
-                    newAddr.setPhone("");
+                    newAddr.setReceiver(receiver != null && !receiver.trim().isEmpty() ? receiver.trim() : "用户");
+                    newAddr.setPhone(phone != null ? phone.trim() : "");
                     newAddr.setAddressDetail(addressText.trim());
                     newAddr.setIsDefault(0);
                     newAddr.setCreateTime(LocalDateTime.now());
                     addressMapper.insert(newAddr);
                     addressId = newAddr.getId();
-                    System.out.println("✓ 自动创建收货地址，ID：" + addressId + "，地址：" + addressText);
+                    System.out.println("✓ 自动创建收货地址，ID：" + addressId + "，地址：" + addressText + "，收货人：" + newAddr.getReceiver() + "，电话：" + newAddr.getPhone());
                 } else {
                     System.out.println("❌ 外送需要收货地址");
                     return Result.error("请填写收货地址");
@@ -85,19 +87,19 @@ public class WxOrderController {
     /** 我的订单列表 */
     @GetMapping
     public Result<Map<String, Object>> list(HttpServletRequest request,
-            @RequestParam(defaultValue = "1") Integer page,
-            @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) Integer status) {
+                                            @RequestParam(defaultValue = "1") Integer page,
+                                            @RequestParam(defaultValue = "10") Integer pageSize,
+                                            @RequestParam(required = false) Integer status) {
         Long userId = (Long) request.getAttribute("userId");
         System.out.println("========== 收到订单列表请求 ==========");
         System.out.println("用户ID：" + userId);
         System.out.println("状态筛选：" + status);
-        
+
         if (userId == null) {
             System.out.println("❌ 用户未登录！");
             return Result.error("请先登录");
         }
-        
+
         Map<String, Object> result = wxOrderService.list(userId, page, pageSize, status);
         System.out.println("✅ 查询成功，订单数量：" + ((List<?>) result.get("list")).size());
         System.out.println("========== 订单列表查询完成 ==========");
